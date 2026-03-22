@@ -732,32 +732,27 @@ async function airtableFetch(url, options={}){
 }
 
 async function getTrocas(){
-  let all=[], offset='';
-  do {
-    const url=`https://api.airtable.com/v0/${BASE_TROCAS}/${TABLE_TROCAS}?pageSize=100${offset?'&offset='+offset:''}`;
-    const data=await airtableFetch(url);
-    all=[...all,...(data.records||[])];
-    offset=data.offset||'';
-  } while(offset);
-  return all;
+  const res=await fetch('/api/trocas');
+  if(!res.ok) throw new Error('Erro ao buscar trocas');
+  return res.json();
 }
 
 async function getCarrinhos(){
-  let all=[], offset='';
-  do {
-    const url=`https://api.airtable.com/v0/${BASE_CARRINHOS}/${TABLE_CARRINHOS}?pageSize=100&sort[0][field]=Data+de+Abandono&sort[0][direction]=desc${offset?'&offset='+offset:''}`;
-    const data=await airtableFetch(url);
-    all=[...all,...(data.records||[])];
-    offset=data.offset||'';
-  } while(offset);
-  return all;
+  const res=await fetch('/api/carrinhos');
+  if(!res.ok) throw new Error('Erro ao buscar carrinhos');
+  return res.json();
 }
 
 async function updateAirtable(base, table, recordId, fields){
-  return airtableFetch(`https://api.airtable.com/v0/${base}/${table}/${recordId}`,{
+  const baseKey = base===BASE_TROCAS?'trocas':'carrinhos';
+  const tableKey = table===TABLE_TROCAS?'trocas':table===TABLE_CARRINHOS?'carrinhos':'usuarios';
+  const res=await fetch(`/api/atualizar/${baseKey}/${tableKey}/${recordId}`,{
     method:'PATCH',
-    body:JSON.stringify({fields})
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(fields)
   });
+  if(!res.ok) throw new Error('Erro ao atualizar');
+  return res.json();
 }
 
 // ===== LOGIN =====
