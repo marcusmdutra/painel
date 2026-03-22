@@ -701,7 +701,8 @@ function badgeStatus(status){
 
 // ===== AIRTABLE API =====
 async function airtableFetch(url, options={}){
-  const res = await fetch(url, {
+  const proxyUrl = url.replace("https://api.airtable.com/", "/airtable-proxy/");
+  const res = await fetch(proxyUrl, {
     ...options,
     headers:{
       'Authorization':'Bearer '+AIRTABLE_TOKEN,
