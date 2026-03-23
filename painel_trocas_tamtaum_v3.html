@@ -16,7 +16,6 @@
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'DM Sans',sans-serif;background:var(--surface-2);color:var(--ink);min-height:100vh}
-
 /* ===== LOGIN ===== */
 #login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,var(--ink) 0%,#2d1a24 100%);padding:20px}
 .login-card{background:white;border-radius:20px;padding:48px;width:100%;max-width:420px;box-shadow:0 32px 80px rgba(0,0,0,.35)}
@@ -33,7 +32,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--surface-2);color:var(--in
 .btn-login:hover{background:var(--rose-dark)}
 .btn-login:disabled{opacity:.6;cursor:not-allowed}
 .login-error{background:var(--red-bg);color:var(--red);border:1px solid #FFCCCC;border-radius:8px;padding:10px 14px;font-size:13px;margin-top:14px;display:none}
-
 /* ===== APP ===== */
 #app{display:none}
 .sidebar{position:fixed;left:0;top:0;bottom:0;width:240px;background:var(--ink);display:flex;flex-direction:column;z-index:100}
@@ -54,7 +52,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--surface-2);color:var(--in
 .user-info .role{font-size:11px;color:rgba(255,255,255,.4)}
 .btn-logout{margin:0 12px 12px;padding:8px 12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:rgba(255,255,255,.5);font-family:inherit;font-size:12px;cursor:pointer;transition:all .15s;width:calc(100% - 24px);text-align:left}
 .btn-logout:hover{background:rgba(255,255,255,.1);color:white}
-
 .main{margin-left:240px;min-height:100vh;display:flex;flex-direction:column}
 .topbar{background:white;border-bottom:1px solid var(--border);padding:0 32px;height:64px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:50}
 .topbar-title{font-size:18px;font-weight:700;color:var(--ink);flex:1}
@@ -77,15 +74,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--surface-2);color:var(--in
 .btn-warning:hover{background:#B06E00}
 .btn-sm{padding:6px 12px;font-size:12px}
 .btn:disabled{opacity:.5;cursor:not-allowed}
-
 .page-content{padding:28px 32px;flex:1}
 .page{display:none}
 .page.active{display:block}
-
 .loading-overlay{position:fixed;inset:0;background:rgba(255,255,255,.8);z-index:999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
 .loading-spinner{width:40px;height:40px;border:3px solid var(--rose-light);border-top-color:var(--rose);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-
 .stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:28px}
 .stat-card{background:white;border:1px solid var(--border);border-radius:12px;padding:20px;position:relative;overflow:hidden}
 .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--rose)}
@@ -97,12 +91,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--surface-2);color:var(--in
 .stat-card.blue::before{background:var(--blue)}
 .stat-card.purple::before{background:var(--purple)}
 .stat-card.red::before{background:var(--red)}
-
 .filters-bar{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap}
 .filter-btn{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:white;color:var(--ink-soft);transition:all .15s;font-family:inherit}
 .filter-btn:hover{border-color:var(--rose);color:var(--rose)}
 .filter-btn.active{background:var(--rose);border-color:var(--rose);color:white}
-
 .table-card{background:white;border:1px solid var(--border);border-radius:12px;overflow:hidden}
 .table-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .table-header h3{font-size:15px;font-weight:700}
@@ -117,7 +109,6 @@ td{padding:14px 20px;font-size:13px;color:var(--ink);vertical-align:middle}
 .td-cliente{font-weight:600}
 .td-data{color:var(--ink-muted);font-size:12px}
 .td-logistica{font-family:'DM Mono',monospace;font-size:11px;color:var(--blue);font-weight:600}
-
 .badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
 .badge::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.7}
 .badge-waiting{background:var(--amber-bg);color:var(--amber)}
@@ -129,7 +120,6 @@ td{padding:14px 20px;font-size:13px;color:var(--ink);vertical-align:middle}
 .badge-refund{background:var(--red-bg);color:var(--red)}
 .badge-done{background:var(--green-bg);color:var(--green)}
 .badge-new{background:var(--surface-3);color:var(--ink-soft)}
-
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(26,18,24,.5);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:20px}
 .modal-overlay.open{display:flex}
 .modal{background:white;border-radius:16px;width:100%;max-width:700px;max-height:92vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.2)}
@@ -140,14 +130,12 @@ td{padding:14px 20px;font-size:13px;color:var(--ink);vertical-align:middle}
 .modal-close:hover{background:var(--surface-2)}
 .modal-body{padding:24px 28px}
 .modal-foot{padding:16px 28px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;position:sticky;bottom:0;background:white;border-radius:0 0 16px 16px}
-
 .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
 .detail-item label{display:block;font-size:11px;font-weight:700;color:var(--ink-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px}
 .detail-item .value{font-size:14px;font-weight:500;color:var(--ink)}
 .detail-item.full{grid-column:1/-1}
 .section-divider{font-size:12px;font-weight:700;color:var(--ink-muted);text-transform:uppercase;letter-spacing:1px;margin:20px 0 14px;display:flex;align-items:center;gap:10px}
 .section-divider::after{content:'';flex:1;height:1px;background:var(--border)}
-
 .timeline{margin:0;padding:0;list-style:none}
 .tl-item{display:flex;gap:12px;padding-bottom:16px;position:relative}
 .tl-item::before{content:'';position:absolute;left:15px;top:28px;bottom:0;width:1px;background:var(--border)}
@@ -156,13 +144,11 @@ td{padding:14px 20px;font-size:13px;color:var(--ink);vertical-align:middle}
 .tl-dot.done{background:var(--green);border-color:var(--green);color:white;font-size:12px;font-weight:700}
 .tl-content .tl-label{font-size:13px;font-weight:600}
 .tl-content .tl-date{font-size:11px;color:var(--ink-muted);margin-top:2px}
-
 .form-group{margin-bottom:16px}
 .form-group label{display:block;font-size:12px;font-weight:600;color:var(--ink-soft);margin-bottom:6px}
 textarea.form-control{resize:vertical;min-height:80px}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 select.form-control{cursor:pointer}
-
 .check-list{display:flex;flex-direction:column;gap:8px}
 .check-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface-2);border-radius:8px;border:1.5px solid var(--border);cursor:pointer;transition:all .15s}
 .check-item:hover{border-color:var(--rose)}
@@ -170,36 +156,29 @@ select.form-control{cursor:pointer}
 .check-item input[type=checkbox]{width:16px;height:16px;accent-color:var(--green);cursor:pointer}
 .check-item .item-name{font-size:13px;font-weight:600;flex:1}
 .check-item .item-code{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink-muted)}
-
 .alert{padding:12px 16px;border-radius:8px;font-size:13px;margin-bottom:16px;display:flex;align-items:flex-start;gap:10px}
 .alert-info{background:var(--blue-bg);color:var(--blue);border:1px solid #C8DEFF}
 .alert-success{background:var(--green-bg);color:var(--green);border:1px solid #B8EDDA}
 .alert-warning{background:var(--amber-bg);color:var(--amber);border:1px solid #FFE0A0}
 .alert-danger{background:var(--red-bg);color:var(--red);border:1px solid #FFCCCC}
-
 .voucher-card{background:linear-gradient(135deg,var(--rose) 0%,var(--rose-dark) 100%);border-radius:12px;padding:20px 24px;color:white;margin-bottom:16px}
 .voucher-card .vc-label{font-size:11px;font-weight:600;opacity:.7;text-transform:uppercase;letter-spacing:1px}
 .voucher-card .vc-value{font-size:36px;font-weight:700;font-family:'DM Mono',monospace;margin:6px 0}
 .voucher-card .vc-code{font-family:'DM Mono',monospace;font-size:14px;background:rgba(255,255,255,.15);padding:6px 12px;border-radius:6px;display:inline-block;margin-top:8px;letter-spacing:2px}
-
 .actions-row{display:flex;gap:8px;flex-wrap:wrap}
-
 .logistica-box{background:var(--blue-bg);border:1.5px solid #C8DEFF;border-radius:10px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
 .logistica-box .lb-label{font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px}
 .logistica-box .lb-code{font-family:'DM Mono',monospace;font-size:18px;font-weight:700;color:var(--blue)}
 .logistica-box .lb-empty{font-size:13px;color:var(--ink-muted);font-style:italic}
-
 .empty-state{text-align:center;padding:60px 20px;color:var(--ink-muted)}
 .empty-state .es-icon{font-size:48px;margin-bottom:16px}
 .empty-state h3{font-size:16px;font-weight:600;margin-bottom:8px;color:var(--ink-soft)}
 .empty-state p{font-size:13px}
-
 .toast{position:fixed;bottom:24px;right:24px;background:var(--ink);color:white;padding:14px 20px;border-radius:10px;font-size:13px;font-weight:500;z-index:9999;transform:translateY(100px);opacity:0;transition:all .3s;max-width:340px}
 .toast.show{transform:translateY(0);opacity:1}
 .toast.success{background:var(--green)}
 .toast.error{background:var(--red)}
 .toast.warning{background:var(--amber)}
-
 .file-upload-area{border:2px dashed var(--border);border-radius:10px;padding:24px;text-align:center;cursor:pointer;transition:all .15s;margin-bottom:8px}
 .file-upload-area:hover{border-color:var(--rose);background:var(--rose-pale)}
 .file-upload-area input{display:none}
@@ -208,7 +187,6 @@ select.form-control{cursor:pointer}
 </style>
 </head>
 <body>
-
 <!-- ===== TELA DE LOGIN ===== -->
 <div id="login-screen">
   <div class="login-card">
@@ -230,7 +208,6 @@ select.form-control{cursor:pointer}
     <div class="login-error" id="login-error">E-mail ou senha incorretos. Verifique e tente novamente.</div>
   </div>
 </div>
-
 <!-- ===== APP ===== -->
 <div id="app">
   <aside class="sidebar">
@@ -248,7 +225,6 @@ select.form-control{cursor:pointer}
     </div>
     <button class="btn-logout" onclick="fazerLogout()">🚪 Sair</button>
   </aside>
-
   <main class="main">
     <div class="topbar">
       <div class="topbar-title" id="topbar-title">Carregando...</div>
@@ -259,7 +235,6 @@ select.form-control{cursor:pointer}
       <button class="btn btn-secondary btn-sm" onclick="recarregarDados()">🔄 Atualizar</button>
       <button class="btn btn-primary" id="btn-nova-troca" onclick="openModal('modal-nova-troca')" style="display:none">+ Nova Troca</button>
     </div>
-
     <div class="page-content">
       <!-- DASHBOARD GERAL -->
       <div class="page" id="page-geral">
@@ -293,7 +268,6 @@ select.form-control{cursor:pointer}
           </div>
         </div>
       </div>
-
       <!-- FALECOM -->
       <div class="page" id="page-falecom">
         <div class="stats-row" style="grid-template-columns:repeat(3,1fr)">
@@ -316,7 +290,6 @@ select.form-control{cursor:pointer}
           </table>
         </div>
       </div>
-
       <!-- LOGISTICA -->
       <div class="page" id="page-logistica">
         <div class="stats-row" style="grid-template-columns:repeat(3,1fr)">
@@ -332,7 +305,6 @@ select.form-control{cursor:pointer}
           </table>
         </div>
       </div>
-
       <!-- FINANCEIRO -->
       <div class="page" id="page-financeiro">
         <div class="stats-row" style="grid-template-columns:repeat(3,1fr)">
@@ -349,7 +321,6 @@ select.form-control{cursor:pointer}
           </table>
         </div>
       </div>
-
       <!-- GERENCIA -->
       <div class="page" id="page-gerencia">
         <div class="stats-row" style="grid-template-columns:repeat(4,1fr)">
@@ -367,7 +338,6 @@ select.form-control{cursor:pointer}
           </table>
         </div>
       </div>
-
       <!-- CARRINHOS -->
       <div class="page" id="page-carrinhos">
         <div class="stats-row" style="grid-template-columns:repeat(4,1fr)">
@@ -387,7 +357,6 @@ select.form-control{cursor:pointer}
     </div>
   </main>
 </div>
-
 <!-- ===== MODAL DETALHE ===== -->
 <div class="modal-overlay" id="modal-detalhe">
   <div class="modal">
@@ -413,7 +382,6 @@ select.form-control{cursor:pointer}
     </div>
   </div>
 </div>
-
 <!-- ===== MODAL CONFERÊNCIA LOGÍSTICA ===== -->
 <div class="modal-overlay" id="modal-conferencia">
   <div class="modal">
@@ -455,7 +423,6 @@ select.form-control{cursor:pointer}
     </div>
   </div>
 </div>
-
 <!-- ===== MODAL VOUCHER ===== -->
 <div class="modal-overlay" id="modal-voucher">
   <div class="modal">
@@ -479,7 +446,6 @@ select.form-control{cursor:pointer}
     </div>
   </div>
 </div>
-
 <!-- ===== MODAL RETENÇÃO ===== -->
 <div class="modal-overlay" id="modal-retencao">
   <div class="modal">
@@ -502,7 +468,6 @@ select.form-control{cursor:pointer}
     </div>
   </div>
 </div>
-
 <!-- ===== MODAL ESTORNO ===== -->
 <div class="modal-overlay" id="modal-estorno">
   <div class="modal">
@@ -536,7 +501,6 @@ select.form-control{cursor:pointer}
     </div>
   </div>
 </div>
-
 <!-- ===== MODAL LOGÍSTICA MANUAL ===== -->
 <div class="modal-overlay" id="modal-logistica-manual">
   <div class="modal">
@@ -577,7 +541,6 @@ select.form-control{cursor:pointer}
     </div>
   </div>
 </div>
-
 <!-- ===== MODAL NOVA TROCA ===== -->
 <div class="modal-overlay" id="modal-nova-troca">
   <div class="modal">
@@ -627,12 +590,10 @@ select.form-control{cursor:pointer}
     </div>
   </div>
 </div>
-
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 <!-- Loading -->
 <div class="loading-overlay" id="loading" style="display:none"><div class="loading-spinner"></div></div>
-
 <script>
 // ===== CONFIG =====
 const BASE_TROCAS = 'appmN5IjqzfwItvdd';
@@ -641,18 +602,15 @@ const TABLE_USUARIOS = 'tblLmQKTpQv8E446q';
 const BASE_CARRINHOS = 'appf4sifttkxfxC2N';
 const TABLE_CARRINHOS = 'tbl4dJkYgu1Tkfe90';
 const N8N_BASE = 'http://178.104.95.111:5678/webhook';
-
 // ===== STATE =====
 let currentUser = null;
 let allTrocas = [];
 let allCarrinhos = [];
 let currentFilter = '';
 let currentRecord = null;
-
 // ===== UTILS =====
 function showLoading(){document.getElementById('loading').style.display='flex'}
 function hideLoading(){document.getElementById('loading').style.display='none'}
-
 function showToast(msg, type=''){
   const t=document.getElementById('toast');
   t.textContent=msg;
@@ -660,10 +618,8 @@ function showToast(msg, type=''){
   t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),3500);
 }
-
 function openModal(id){document.getElementById(id).classList.add('open');document.body.style.overflow='hidden'}
 function closeModal(id){document.getElementById(id).classList.remove('open');document.body.style.overflow=''}
-
 function formatDate(str){
   if(!str) return '—';
   try{
@@ -671,12 +627,10 @@ function formatDate(str){
     return d.toLocaleDateString('pt-BR');
   }catch{return str}
 }
-
 function formatCurrency(v){
   if(!v && v!==0) return '—';
   return 'R$ '+parseFloat(v).toFixed(2).replace('.',',');
 }
-
 function badgeStatus(status){
   const map={
     'Aguardando código de logística':'badge-waiting',
@@ -692,7 +646,6 @@ function badgeStatus(status){
   };
   return map[status]||'badge-new';
 }
-
 // ===== API =====
 async function getTrocas(){
   const res = await fetch('/api/trocas');
@@ -700,14 +653,12 @@ async function getTrocas(){
   const data = await res.json();
   return Array.isArray(data) ? data : (data.records || []);
 }
-
 async function getCarrinhos(){
   const res = await fetch('/api/carrinhos');
   if(!res.ok) throw new Error('Erro ao buscar carrinhos');
   const data = await res.json();
   return Array.isArray(data) ? data : (data.records || []);
 }
-
 async function updateAirtable(base, table, recordId, fields){
   const baseKey = base===BASE_TROCAS ? 'trocas' : 'carrinhos';
   const tableKey = table===TABLE_TROCAS ? 'trocas' : table===TABLE_CARRINHOS ? 'carrinhos' : 'usuarios';
@@ -720,19 +671,101 @@ async function updateAirtable(base, table, recordId, fields){
   if(!res.ok) throw new Error(data.error || 'Erro ao atualizar');
   return data;
 }
-
+function firstFilled(...values){
+  for(const v of values){
+    if(v!==undefined && v!==null && String(v).trim()!=='') return v;
+  }
+  return '';
+}
+function normalizeTroca(rec){
+  const f = rec?.fields || {};
+  return {
+    id: rec?.id || '',
+    createdTime: rec?.createdTime || '',
+    raw: rec,
+    fields: f,
+    status: firstFilled(f['Status Atual'], f['Status'], 'Novo'),
+    protocolo: firstFilled(f['Protocolo'], f['Número Protocolo'], f['Protocolo Jira'], '—'),
+    cliente: firstFilled(f['Nome do Cliente'], f['Cliente'], f['cliente'], '—'),
+    pedido: firstFilled(f['Número do Pedido'], f['Pedido'], '—'),
+    dataAbertura: firstFilled(f['Data Criação'], f['Data Solicitação'], rec?.createdTime, ''),
+    pecasDeclaradas: firstFilled(f['Peças Declaradas'], f['Pecas Declaradas'], f['Itens Declarados'], '—'),
+    codigosDeclarados: firstFilled(f['Códigos Declarados'], f['Codigos Declarados'], ''),
+    codigoLogistica: firstFilled(
+      f['Código de Logística'],
+      f['Codigo de Logistica'],
+      f['Código Logística'],
+      f['Código da Logística Reversa'],
+      f['Código da Logistica Reversa'],
+      f['Logística Reversa'],
+      f['Codigo de Postagem'],
+      ''
+    ),
+    email: firstFilled(f['Email'], f['E-mail'], f['E-mail do Cliente'], f['Email do Cliente'], '—'),
+    telefone: firstFilled(f['Telefone'], f['Telefone do Cliente'], f['WhatsApp'], '—'),
+    motivo: firstFilled(f['Motivo'], '—'),
+    desejo: firstFilled(f['Desejo'], f['Desejo da Cliente'], '—'),
+    valorVoucher: firstFilled(f['Valor do Voucher'], f['Valor Voucher'], 0),
+    trocaNoPrazo: firstFilled(f['Troca no Prazo'], f['No Prazo'], f['Dentro do Prazo'], '—'),
+    is2atroca: !!firstFilled(f['is2atroca'], f['2a troca'], false),
+    dataEmissao: firstFilled(f['Data de Emissão'], f['Data Emissão'], f['Data Emissão Logística'], f['Data da Logística Reversa'], ''),
+    dataAguardandoCliente: firstFilled(f['Data Aguardando Cliente'], f['Data de Postagem'], f['Data Postagem'], ''),
+    dataRecebimento: firstFilled(f['Data de Recebimento na Empresa'], f['Data Recebimento na Empresa'], f['Data Recebimento'], ''),
+    dataVoucher: firstFilled(f['Data Voucher'], f['Data de Envio do Voucher'], f['Data Validação Voucher'], ''),
+    dataRetencao: firstFilled(f['Data Retenção'], f['Data de Retenção'], ''),
+    dataEstorno: firstFilled(f['Data Estorno'], f['Data de Estorno'], f['Data Estorno Realizado'], ''),
+    dataFinalizacao: firstFilled(f['Data Finalização'], f['Data de Finalização'], f['Conclusão'], ''),
+  };
+}
+function getCurrentTimelineStep(status=''){
+  const s = String(status).toLowerCase();
+  if(s.includes('código de logística')) return 'emissao';
+  if(s.includes('emissão da logística reversa')) return 'emissao';
+  if(s.includes('aguardando cliente')) return 'transito';
+  if(s.includes('peça recebida')) return 'recebimento';
+  if(s.includes('aguardando voucher')) return 'voucher';
+  if(s.includes('retenção')) return 'retencao';
+  if(s.includes('estorno')) return 'estorno';
+  if(s.includes('finalizado')) return 'finalizacao';
+  return 'solicitacao';
+}
+function timelineDot(stepState){
+  if(stepState==='done') return '<div class="tl-dot done">✓</div>';
+  if(stepState==='current') return '<div class="tl-dot" style="background:var(--amber-bg);border-color:var(--amber)">⏳</div>';
+  return '<div class="tl-dot">•</div>';
+}
+function buildTimelineHtml(t){
+  const currentKey = getCurrentTimelineStep(t.status);
+  const steps = [
+    { key:'solicitacao', label:'Troca solicitada', date:t.dataAbertura, detail:'' },
+    { key:'emissao', label:'Logística reversa gerada', date:t.dataEmissao, detail:t.codigoLogistica ? `Código: ${t.codigoLogistica}` : '' },
+    { key:'transito', label:'Aguardando cliente', date:t.dataAguardandoCliente, detail:'' },
+    { key:'recebimento', label:'Peça recebida na empresa', date:t.dataRecebimento, detail:'' },
+    { key:'voucher', label:'Voucher', date:t.dataVoucher, detail:t.valorVoucher || t.valorVoucher===0 ? `Valor: ${formatCurrency(t.valorVoucher)}` : '' },
+    { key:'retencao', label:'Retenção', date:t.dataRetencao, detail:'' },
+    { key:'estorno', label:'Estorno', date:t.dataEstorno, detail:'' },
+    { key:'finalizacao', label:'Finalizado', date:t.dataFinalizacao, detail:'' },
+  ];
+  const currentIndex = steps.findIndex(step => step.key===currentKey);
+  return steps.map((step, index) => {
+    const done = !!step.date;
+    const current = !done && index===currentIndex;
+    const state = done ? 'done' : (current ? 'current' : 'pending');
+    const meta = step.date
+      ? formatDate(step.date)
+      : (current ? (step.detail || 'Status atual — sem data registrada') : (step.detail || 'Sem data registrada'));
+    return `<li class="tl-item">${timelineDot(state)}<div class="tl-content"><div class="tl-label"${current ? ' style="color:var(--amber)"' : ''}>${step.label}</div><div class="tl-date">${meta}</div></div></li>`;
+  }).join('');
+}
 // ===== LOGIN =====
 async function fazerLogin(){
   const email=document.getElementById('login-email').value.trim();
   const senha=document.getElementById('login-senha').value;
   const err=document.getElementById('login-error');
   const btn=document.getElementById('btn-entrar');
-
   if(!email||!senha){err.style.display='block';err.textContent='Preencha todos os campos.';return}
-
   btn.disabled=true;btn.textContent='Verificando...';
   err.style.display='none';
-
   try{
     const res=await fetch('/api/login',{
       method:'POST',
@@ -741,13 +774,11 @@ async function fazerLogin(){
     });
     const data=await res.json();
     if(!res.ok||!data.ok) throw new Error(data.erro||'Erro no login');
-
     currentUser={
       email:data.email,
       nome:data.nome,
       setor:data.setor
     };
-
     iniciarApp();
   }catch(e){
     err.style.display='block';
@@ -757,11 +788,9 @@ async function fazerLogin(){
     btn.disabled=false;btn.textContent='Entrar';
   }
 }
-
 document.addEventListener('keydown', e=>{
   if(e.key==='Enter' && document.getElementById('login-screen').style.display!=='none') fazerLogin();
 });
-
 function fazerLogout(){
   currentUser=null;allTrocas=[];allCarrinhos=[];
   document.getElementById('app').style.display='none';
@@ -769,25 +798,20 @@ function fazerLogout(){
   document.getElementById('login-email').value='';
   document.getElementById('login-senha').value='';
 }
-
 // ===== APP INIT =====
 function iniciarApp(){
   document.getElementById('login-screen').style.display='none';
   document.getElementById('app').style.display='block';
-
   const iniciais=currentUser.nome.split(' ').map(p=>p[0]).slice(0,2).join('').toUpperCase();
   document.getElementById('user-avatar').textContent=iniciais;
   document.getElementById('user-name').textContent=currentUser.nome;
   document.getElementById('user-role').textContent=currentUser.setor;
-
   construirMenu();
   carregarDados();
 }
-
 function construirMenu(){
   const setor=currentUser.setor;
   const isAdmin=setor==='Admin';
-
   const menus=[
     {id:'geral', icon:'📊', label:'Dashboard', setores:['Admin','Falecom','Logística','Financeiro','Gerência']},
     {id:'falecom', icon:'💬', label:'Falecom', setores:['Admin','Falecom']},
@@ -796,10 +820,8 @@ function construirMenu(){
     {id:'gerencia', icon:'🏢', label:'Gerência', setores:['Admin','Gerência']},
     {id:'carrinhos', icon:'🛒', label:'Carrinhos', setores:['Admin','Falecom','Gerência']},
   ];
-
   let html='<div class="nav-section">Navegação</div>';
   let primeiroMenu=null;
-
   menus.forEach(m=>{
     if(isAdmin||m.setores.includes(setor)){
       if(!primeiroMenu) primeiroMenu=m.id;
@@ -809,17 +831,12 @@ function construirMenu(){
       </button>`;
     }
   });
-
   document.getElementById('sidebar-nav').innerHTML=html;
-
   // Mostrar botão nova troca para falecom e admin
   if(isAdmin||setor==='Falecom') document.getElementById('btn-nova-troca').style.display='flex';
-
   if(primeiroMenu) showPage(primeiroMenu, document.querySelector(`[data-page="${primeiroMenu}"]`));
 }
-
 const pageNames={geral:'Dashboard Geral',falecom:'Setor Falecom',logistica:'Setor Logística',financeiro:'Setor Financeiro',gerencia:'Gerência',carrinhos:'Carrinhos Abandonados'};
-
 function showPage(name, el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
@@ -834,7 +851,6 @@ function showPage(name, el){
   const firstFilter=document.querySelector('#filters-geral .filter-btn');
   if(firstFilter) firstFilter.classList.add('active');
 }
-
 // ===== DADOS =====
 async function carregarDados(){
   showLoading();
@@ -850,9 +866,7 @@ async function carregarDados(){
     hideLoading();
   }
 }
-
 function recarregarDados(){carregarDados()}
-
 function renderizarTudo(){
   renderGeral();
   renderFalecom();
@@ -862,7 +876,6 @@ function renderizarTudo(){
   renderCarrinhos();
   atualizarBadges();
 }
-
 // ===== FILTROS =====
 function setFilter(el, status){
   el.closest('.filters-bar').querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
@@ -870,27 +883,27 @@ function setFilter(el, status){
   currentFilter=status;
   renderGeral();
 }
-
 function filtrarTabela(){
   const q=document.getElementById('search-input').value.toLowerCase();
   document.querySelectorAll('tbody tr').forEach(tr=>{
     tr.style.display=tr.textContent.toLowerCase().includes(q)?'':'none';
   });
 }
-
 // ===== RENDER GERAL =====
 function renderGeral(){
-  const trocas=currentFilter ? allTrocas.filter(r=>r.fields['Status Atual']===currentFilter) : allTrocas;
+  const trocas = currentFilter
+    ? allTrocas.filter(r=>normalizeTroca(r).status===currentFilter)
+    : allTrocas;
   const tbody=document.getElementById('tabela-geral');
   document.getElementById('count-geral').textContent=trocas.length+' registros';
-
   const hoje=new Date().toDateString();
   let total=0,acao=0,finHoje=0,transito=0,retencao=0;
   allTrocas.forEach(r=>{
-    const s=r.fields['Status Atual']||'';
+    const t = normalizeTroca(r);
+    const s=t.status||'';
     if(s!=='Finalizado') total++;
     if(['Aguardando código de logística','Peça recebida','Aguardando voucher','Aguardando estorno'].includes(s)) acao++;
-    if(s==='Finalizado' && new Date(r.fields['Data Criação']||r.createdTime).toDateString()===hoje) finHoje++;
+    if(s==='Finalizado' && new Date(t.dataAbertura||t.createdTime).toDateString()===hoje) finHoje++;
     if(s==='Aguardando cliente') transito++;
     if(s==='Em retenção') retencao++;
   });
@@ -899,155 +912,133 @@ function renderGeral(){
   document.getElementById('stat-hoje').textContent=finHoje;
   document.getElementById('stat-transito').textContent=transito;
   document.getElementById('stat-retencao').textContent=retencao;
-
   if(!trocas.length){tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--ink-muted)">Nenhum registro encontrado</td></tr>';return}
-
   tbody.innerHTML=trocas.map(r=>{
-    const f=r.fields;
-    const status=f['Status Atual']||'Novo';
-    const codLog=f['Código de Logística']||'';
+    const t = normalizeTroca(r);
+    const codLog=t.codigoLogistica||'';
     return `<tr onclick="abrirDetalhe('${r.id}')">
-      <td class="td-proto">${f['Protocolo']||'—'}</td>
-      <td class="td-cliente">${f['Nome do Cliente']||'—'}</td>
-      <td>#${f['Número do Pedido']||'—'}</td>
-      <td style="font-size:12px">${f['Peças Declaradas']||'—'}</td>
+      <td class="td-proto">${t.protocolo}</td>
+      <td class="td-cliente">${t.cliente}</td>
+      <td>#${t.pedido}</td>
+      <td style="font-size:12px">${t.pecasDeclaradas}</td>
       <td>${codLog?`<span class="td-logistica">${codLog}</span>`:'<span style="color:var(--ink-muted);font-size:12px">—</span>'}</td>
-      <td><span class="badge ${badgeStatus(status)}">${status}</span></td>
-      <td class="td-data">${formatDate(f['Data Criação']||r.createdTime)}</td>
+      <td><span class="badge ${badgeStatus(t.status)}">${t.status}</span></td>
+      <td class="td-data">${formatDate(t.dataAbertura||t.createdTime)}</td>
       <td><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();abrirDetalhe('${r.id}')">Ver →</button></td>
     </tr>`;
   }).join('');
 }
-
 // ===== RENDER FALECOM =====
 function renderFalecom(){
   const fila=allTrocas.filter(r=>{
-    const s=r.fields['Status Atual']||'';
+    const s=normalizeTroca(r).status||'';
     return ['Aguardando código de logística','Aguardando voucher','Em retenção','Emissão da Logística Reversa'].includes(s);
   });
-  const vouchers=allTrocas.filter(r=>r.fields['Status Atual']==='Aguardando voucher').length;
-  const semLog=allTrocas.filter(r=>r.fields['Status Atual']==='Aguardando código de logística').length;
-  const ret=allTrocas.filter(r=>r.fields['Status Atual']==='Em retenção').length;
-
+  const vouchers=allTrocas.filter(r=>normalizeTroca(r).status==='Aguardando voucher').length;
+  const semLog=allTrocas.filter(r=>normalizeTroca(r).status==='Aguardando código de logística').length;
+  const ret=allTrocas.filter(r=>normalizeTroca(r).status==='Em retenção').length;
   document.getElementById('stat-falecom-voucher').textContent=vouchers;
   document.getElementById('stat-falecom-logistica').textContent=semLog;
   document.getElementById('stat-falecom-retencao').textContent=ret;
   document.getElementById('count-falecom').textContent=fila.length+' casos';
-
   const alertEl=document.getElementById('alert-falecom-voucher');
   if(vouchers>0){alertEl.style.display='flex';document.getElementById('txt-alert-falecom').textContent=vouchers+' voucher'+(vouchers>1?'s':'')+' aguardando sua validação.';}
   else alertEl.style.display='none';
-
   const tbody=document.getElementById('tabela-falecom');
   if(!fila.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--ink-muted)">Nenhum caso pendente 🎉</td></tr>';return}
-
   tbody.innerHTML=fila.map(r=>{
-    const f=r.fields;
-    const status=f['Status Atual']||'';
-    const codLog=f['Código de Logística']||'';
+    const t = normalizeTroca(r);
+    const status=t.status||'';
+    const codLog=t.codigoLogistica||'';
     let acoes='';
     if(status==='Aguardando voucher') acoes=`<button class="btn btn-success btn-sm" onclick="event.stopPropagation();abrirVoucher('${r.id}')">✓ Validar</button>`;
     else if(status==='Em retenção') acoes=`<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();abrirRetencao('${r.id}')">Ver →</button>`;
     else if(status==='Aguardando código de logística') acoes=`<button class="btn btn-warning btn-sm" onclick="event.stopPropagation();preencherLogisticaManual('${r.id}')">📬 Gerar</button>`;
     return `<tr onclick="abrirDetalhe('${r.id}')">
-      <td class="td-proto">${f['Protocolo']||'—'}</td>
-      <td class="td-cliente">${f['Nome do Cliente']||'—'}</td>
-      <td style="font-size:12px">${f['Peças Declaradas']||'—'}</td>
+      <td class="td-proto">${t.protocolo}</td>
+      <td class="td-cliente">${t.cliente}</td>
+      <td style="font-size:12px">${t.pecasDeclaradas}</td>
       <td>${codLog?`<span class="td-logistica">${codLog}</span>`:'<span style="color:var(--ink-muted);font-size:12px">—</span>'}</td>
-      <td><strong style="color:var(--rose)">${formatCurrency(f['Valor do Voucher'])}</strong></td>
+      <td><strong style="color:var(--rose)">${formatCurrency(t.valorVoucher)}</strong></td>
       <td><span class="badge ${badgeStatus(status)}">${status}</span></td>
       <td><div class="actions-row">${acoes}</div></td>
     </tr>`;
   }).join('');
 }
-
 // ===== RENDER LOGÍSTICA =====
 function renderLogistica(){
-  const pecas=allTrocas.filter(r=>['Peça recebida','Aguardando cliente','Emissão da Logística Reversa'].includes(r.fields['Status Atual']||''));
-  const conferir=allTrocas.filter(r=>r.fields['Status Atual']==='Peça recebida').length;
-  const aguardando=allTrocas.filter(r=>r.fields['Status Atual']==='Aguardando cliente').length;
-
+  const pecas=allTrocas.filter(r=>['Peça recebida','Aguardando cliente','Emissão da Logística Reversa'].includes(normalizeTroca(r).status||''));
+  const conferir=allTrocas.filter(r=>normalizeTroca(r).status==='Peça recebida').length;
+  const aguardando=allTrocas.filter(r=>normalizeTroca(r).status==='Aguardando cliente').length;
   document.getElementById('stat-log-conferir').textContent=conferir;
   document.getElementById('stat-log-aguardando').textContent=aguardando;
   document.getElementById('stat-log-hoje').textContent=0;
   document.getElementById('count-logistica').textContent=conferir+' a conferir';
-
   const tbody=document.getElementById('tabela-logistica');
   if(!pecas.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--ink-muted)">Nenhuma peça aguardando conferência</td></tr>';return}
-
   tbody.innerHTML=pecas.map(r=>{
-    const f=r.fields;
-    const status=f['Status Atual']||'';
-    const codLog=f['Código de Logística']||'';
+    const t = normalizeTroca(r);
+    const status=t.status||'';
+    const codLog=t.codigoLogistica||'';
     return `<tr onclick="abrirConferencia('${r.id}')">
-      <td class="td-proto">${f['Protocolo']||'—'}</td>
-      <td class="td-cliente">${f['Nome do Cliente']||'—'}</td>
-      <td style="font-size:12px">${f['Peças Declaradas']||'—'}</td>
+      <td class="td-proto">${t.protocolo}</td>
+      <td class="td-cliente">${t.cliente}</td>
+      <td style="font-size:12px">${t.pecasDeclaradas}</td>
       <td>${codLog?`<span class="td-logistica">${codLog}</span>`:'<span style="color:var(--ink-muted);font-size:12px">—</span>'}</td>
       <td><span class="badge ${badgeStatus(status)}">${status}</span></td>
       <td>${status==='Peça recebida'?`<button class="btn btn-primary btn-sm" onclick="event.stopPropagation();abrirConferencia('${r.id}')">📋 Conferir</button>`:'—'}</td>
     </tr>`;
   }).join('');
 }
-
 // ===== RENDER FINANCEIRO =====
 function renderFinanceiro(){
-  const estornos=allTrocas.filter(r=>['Aguardando estorno','Estorno autorizado'].includes(r.fields['Status Atual']||''));
-  const valor=estornos.reduce((s,r)=>s+parseFloat(r.fields['Valor do Voucher']||0),0);
-
+  const estornos=allTrocas.filter(r=>['Aguardando estorno','Estorno autorizado'].includes(normalizeTroca(r).status||''));
+  const valor=estornos.reduce((s,r)=>s+parseFloat(normalizeTroca(r).valorVoucher||0),0);
   document.getElementById('stat-fin-estorno').textContent=estornos.length;
   document.getElementById('stat-fin-valor').textContent=valor>0?'R$'+valor.toFixed(0):'—';
   document.getElementById('stat-fin-hoje').textContent=0;
   document.getElementById('count-financeiro').textContent=estornos.length+' casos';
-
   const alertEl=document.getElementById('alert-financeiro');
   if(estornos.length>0){alertEl.style.display='flex';document.getElementById('txt-alert-financeiro').textContent=estornos.length+' estorno'+(estornos.length>1?'s':'')+' autorizado'+(estornos.length>1?'s':'')+' aguardando processamento no Pagar.me.';}
   else alertEl.style.display='none';
-
   const tbody=document.getElementById('tabela-financeiro');
   if(!estornos.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--ink-muted)">Nenhum estorno pendente 🎉</td></tr>';return}
-
   tbody.innerHTML=estornos.map(r=>{
-    const f=r.fields;
+    const t = normalizeTroca(r);
     return `<tr onclick="abrirEstorno('${r.id}')">
-      <td class="td-proto">${f['Protocolo']||'—'}</td>
-      <td class="td-cliente">${f['Nome do Cliente']||'—'}</td>
-      <td>#${f['Número do Pedido']||'—'}</td>
-      <td><strong style="color:var(--red)">${formatCurrency(f['Valor do Voucher'])}</strong></td>
+      <td class="td-proto">${t.protocolo}</td>
+      <td class="td-cliente">${t.cliente}</td>
+      <td>#${t.pedido}</td>
+      <td><strong style="color:var(--red)">${formatCurrency(t.valorVoucher)}</strong></td>
       <td style="font-size:12px;color:var(--ink-muted)">Gerência</td>
       <td><button class="btn btn-primary btn-sm" onclick="event.stopPropagation();abrirEstorno('${r.id}')">💳 Processar</button></td>
     </tr>`;
   }).join('');
 }
-
 // ===== RENDER GERÊNCIA =====
 function renderGerencia(){
-  const retencao=allTrocas.filter(r=>r.fields['Status Atual']==='Em retenção');
+  const retencao=allTrocas.filter(r=>normalizeTroca(r).status==='Em retenção');
   const total=allTrocas.length;
-  const fin=allTrocas.filter(r=>r.fields['Status Atual']==='Finalizado').length;
-  const estorno=allTrocas.filter(r=>['Aguardando estorno','Estorno autorizado'].includes(r.fields['Status Atual']||'')).length;
-
+  const fin=allTrocas.filter(r=>normalizeTroca(r).status==='Finalizado').length;
+  const estorno=allTrocas.filter(r=>['Aguardando estorno','Estorno autorizado'].includes(normalizeTroca(r).status||'')).length;
   document.getElementById('stat-ger-retencao').textContent=retencao.length;
   document.getElementById('stat-ger-mes').textContent=total;
   document.getElementById('stat-ger-fin').textContent=fin;
   document.getElementById('stat-ger-estorno').textContent=estorno;
   document.getElementById('count-gerencia').textContent=retencao.length+' caso'+(retencao.length!==1?'s':'');
-
   const alertEl=document.getElementById('alert-gerencia');
   if(retencao.length>0){alertEl.style.display='flex';document.getElementById('txt-alert-gerencia').textContent=retencao.length+' caso'+(retencao.length>1?'s':'')+' em retenção aguarda'+(retencao.length>1?'m':'')+ ' sua decisão.';}
   else alertEl.style.display='none';
-
   const tbody=document.getElementById('tabela-gerencia');
   if(!retencao.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--ink-muted)">Nenhum caso em retenção 🎉</td></tr>';return}
-
   tbody.innerHTML=retencao.map(r=>{
-    const f=r.fields;
+    const t = normalizeTroca(r);
     return `<tr onclick="abrirRetencao('${r.id}')">
-      <td class="td-proto">${f['Protocolo']||'—'}</td>
-      <td class="td-cliente">${f['Nome do Cliente']||'—'}</td>
-      <td style="font-size:12px">${f['Peças Declaradas']||'—'}</td>
-      <td><strong>${formatCurrency(f['Valor do Voucher'])}</strong></td>
-      <td style="max-width:180px;font-size:12px;color:var(--ink-muted)">${f['Motivo']||'—'}</td>
+      <td class="td-proto">${t.protocolo}</td>
+      <td class="td-cliente">${t.cliente}</td>
+      <td style="font-size:12px">${t.pecasDeclaradas}</td>
+      <td><strong>${formatCurrency(t.valorVoucher)}</strong></td>
+      <td style="max-width:180px;font-size:12px;color:var(--ink-muted)">${t.motivo||'—'}</td>
       <td><div class="actions-row">
         <button class="btn btn-success btn-sm" onclick="event.stopPropagation();currentRecord=allTrocas.find(x=>x.id==='${r.id}');autorizarVoucher()">✓ Voucher</button>
         <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();currentRecord=allTrocas.find(x=>x.id==='${r.id}');autorizarEstorno()">💳 Estorno</button>
@@ -1055,23 +1046,19 @@ function renderGerencia(){
     </tr>`;
   }).join('');
 }
-
 // ===== RENDER CARRINHOS =====
 function renderCarrinhos(){
   const total=allCarrinhos.length;
   const enviados=allCarrinhos.filter(r=>r.fields['Mensagem Enviada']&&r.fields['Mensagem Enviada']!=='Não').length;
   const recuperados=allCarrinhos.filter(r=>r.fields['Status do Carrinho']==='Recuperado').length;
   const taxa=total>0?Math.round(recuperados/total*100):0;
-
   document.getElementById('stat-carr-total').textContent=total;
   document.getElementById('stat-carr-enviados').textContent=enviados;
   document.getElementById('stat-carr-recuperados').textContent=recuperados;
   document.getElementById('stat-carr-taxa').textContent=taxa+'%';
   document.getElementById('count-carrinhos').textContent=total+' registros';
-
   const tbody=document.getElementById('tabela-carrinhos');
   if(!allCarrinhos.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--ink-muted)">Nenhum carrinho registrado ainda</td></tr>';return}
-
   tbody.innerHTML=allCarrinhos.slice(0,50).map(r=>{
     const f=r.fields;
     const status=f['Status do Carrinho']||'Novo';
@@ -1087,92 +1074,75 @@ function renderCarrinhos(){
     </tr>`;
   }).join('');
 }
-
 // ===== BADGES =====
 function atualizarBadges(){
   const counts={
-    falecom: allTrocas.filter(r=>['Aguardando código de logística','Aguardando voucher','Em retenção'].includes(r.fields['Status Atual']||'')).length,
-    logistica: allTrocas.filter(r=>r.fields['Status Atual']==='Peça recebida').length,
-    financeiro: allTrocas.filter(r=>['Aguardando estorno','Estorno autorizado'].includes(r.fields['Status Atual']||'')).length,
-    gerencia: allTrocas.filter(r=>r.fields['Status Atual']==='Em retenção').length,
-    geral: allTrocas.filter(r=>r.fields['Status Atual']!=='Finalizado').length,
+    falecom: allTrocas.filter(r=>['Aguardando código de logística','Aguardando voucher','Em retenção'].includes(normalizeTroca(r).status||'')).length,
+    logistica: allTrocas.filter(r=>normalizeTroca(r).status==='Peça recebida').length,
+    financeiro: allTrocas.filter(r=>['Aguardando estorno','Estorno autorizado'].includes(normalizeTroca(r).status||'')).length,
+    gerencia: allTrocas.filter(r=>normalizeTroca(r).status==='Em retenção').length,
+    geral: allTrocas.filter(r=>normalizeTroca(r).status!=='Finalizado').length,
   };
   Object.entries(counts).forEach(([id,n])=>{
     const b=document.getElementById('badge-'+id);
     if(b){b.textContent=n;b.style.display=n>0?'block':'none';}
   });
 }
-
 // ===== MODAIS DE AÇÃO =====
 function abrirDetalhe(recordId){
   const rec=allTrocas.find(r=>r.id===recordId);
   if(!rec) return;
   currentRecord=rec;
-  const f=rec.fields;
-  const status=f['Status Atual']||'';
-  const codLog=f['Código de Logística']||'';
-
-  document.getElementById('modal-detalhe-proto').innerHTML=`${f['Protocolo']||'—'} &nbsp;<span class="badge ${badgeStatus(status)}">${status}</span>`;
-
+  const t = normalizeTroca(rec);
+  document.getElementById('modal-detalhe-proto').innerHTML=`${t.protocolo} &nbsp;<span class="badge ${badgeStatus(t.status)}">${t.status}</span>`;
   const logBox=document.getElementById('modal-logistica-box');
   const logCode=document.getElementById('modal-logistica-code');
-  if(codLog){logCode.textContent=codLog;logBox.style.display='flex';}
+  if(t.codigoLogistica){logCode.textContent=t.codigoLogistica;logBox.style.display='flex';}
   else{logBox.style.display='none';}
-
+  const prazoColor = t.trocaNoPrazo==='Sim' ? 'var(--green)' : t.trocaNoPrazo==='Não' ? 'var(--red)' : 'var(--ink)';
+  const prazoText = t.trocaNoPrazo==='Sim' ? '✓ Sim' : t.trocaNoPrazo==='Não' ? '✗ Não' : t.trocaNoPrazo;
   document.getElementById('modal-detalhe-grid').innerHTML=`
-    <div class="detail-item"><label>Cliente</label><div class="value">${f['Nome do Cliente']||'—'}</div></div>
-    <div class="detail-item"><label>Pedido</label><div class="value">#${f['Número do Pedido']||'—'}</div></div>
-    <div class="detail-item"><label>E-mail</label><div class="value">${f['Email']||'—'}</div></div>
-    <div class="detail-item"><label>Telefone</label><div class="value">${f['Telefone']||'—'}</div></div>
-    <div class="detail-item"><label>Motivo</label><div class="value">${f['Motivo']||'—'}</div></div>
-    <div class="detail-item"><label>Desejo</label><div class="value">${f['Desejo']||'—'}</div></div>
-    <div class="detail-item full"><label>Peças Declaradas</label><div class="value">${f['Peças Declaradas']||'—'}</div></div>
-    <div class="detail-item"><label>Valor do Voucher</label><div class="value" style="color:var(--rose);font-weight:700;font-size:18px">${formatCurrency(f['Valor do Voucher'])}</div></div>
-    <div class="detail-item"><label>Troca no Prazo</label><div class="value" style="color:${f['Troca no Prazo']==='Sim'?'var(--green)':'var(--red)'}">${f['Troca no Prazo']==='Sim'?'✓ Sim':'✗ Não'}</div></div>
-    ${codLog?`<div class="detail-item full"><label>Código de Logística</label><div class="value" style="font-family:'DM Mono',monospace;font-size:16px;color:var(--blue);font-weight:700">${codLog}</div></div>`:''}
+    <div class="detail-item"><label>Cliente</label><div class="value">${t.cliente}</div></div>
+    <div class="detail-item"><label>Pedido</label><div class="value">#${t.pedido}</div></div>
+    <div class="detail-item"><label>E-mail</label><div class="value">${t.email}</div></div>
+    <div class="detail-item"><label>Telefone</label><div class="value">${t.telefone}</div></div>
+    <div class="detail-item"><label>Motivo</label><div class="value">${t.motivo}</div></div>
+    <div class="detail-item"><label>Desejo</label><div class="value">${t.desejo}</div></div>
+    <div class="detail-item full"><label>Peças Declaradas</label><div class="value">${t.pecasDeclaradas}</div></div>
+    <div class="detail-item"><label>Valor do Voucher</label><div class="value" style="color:var(--rose);font-weight:700;font-size:18px">${formatCurrency(t.valorVoucher)}</div></div>
+    <div class="detail-item"><label>Troca no Prazo</label><div class="value" style="color:${prazoColor}">${prazoText}</div></div>
+    ${t.codigoLogistica?`<div class="detail-item full"><label>Código de Logística</label><div class="value" style="font-family:'DM Mono',monospace;font-size:16px;color:var(--blue);font-weight:700">${t.codigoLogistica}</div></div>`:''}
   `;
-
-  document.getElementById('modal-detalhe-timeline').innerHTML=`
-    <li class="tl-item"><div class="tl-dot done">✓</div><div class="tl-content"><div class="tl-label">Troca solicitada</div><div class="tl-date">${formatDate(f['Data Criação']||rec.createdTime)}</div></div></li>
-    ${codLog?`<li class="tl-item"><div class="tl-dot done">✓</div><div class="tl-content"><div class="tl-label">Logística reversa gerada</div><div class="tl-date">Código: ${codLog}</div></div></li>`:''}
-    <li class="tl-item"><div class="tl-dot" style="background:var(--amber-bg);border-color:var(--amber)">${status==='Finalizado'?'✓':'⏳'}</div><div class="tl-content"><div class="tl-label" style="color:var(--amber)">${status}</div><div class="tl-date">Status atual</div></div></li>
-  `;
-
+  document.getElementById('modal-detalhe-timeline').innerHTML=buildTimelineHtml(t);
   const btnLog=document.getElementById('btn-gerar-logistica-detalhe');
-  btnLog.style.display=status==='Aguardando código de logística'?'flex':'none';
-
+  btnLog.style.display=t.status==='Aguardando código de logística'?'flex':'none';
   openModal('modal-detalhe');
 }
-
 function abrirLogisticaManualComDados(){
   if(!currentRecord) return;
   const f=currentRecord.fields;
   preencherLogisticaManual(currentRecord.id);
   closeModal('modal-detalhe');
 }
-
 function preencherLogisticaManual(recordId){
   const rec=allTrocas.find(r=>r.id===recordId);
   if(rec){
-    const f=rec.fields;
-    document.getElementById('logmanual-protocolo').value=f['Protocolo']||'';
-    document.getElementById('logmanual-pedido').value=f['Número do Pedido']||'';
+    const t = normalizeTroca(rec);
+    document.getElementById('logmanual-protocolo').value=t.protocolo==='—'?'':t.protocolo;
+    document.getElementById('logmanual-pedido').value=t.pedido==='—'?'':t.pedido;
     document.getElementById('logmanual-recordid').value=rec.id;
-    document.getElementById('logmanual-cliente').value=f['Nome do Cliente']||'';
-    document.getElementById('logmanual-telefone').value=f['Telefone']||'';
+    document.getElementById('logmanual-cliente').value=t.cliente==='—'?'':t.cliente;
+    document.getElementById('logmanual-telefone').value=t.telefone==='—'?'':t.telefone;
   }
   openModal('modal-logistica-manual');
 }
-
 async function gerarLogisticaManual(){
   const protocolo=document.getElementById('logmanual-protocolo').value.trim();
   const pedido=document.getElementById('logmanual-pedido').value.trim();
   const recordId=document.getElementById('logmanual-recordid').value.trim();
   const cliente=document.getElementById('logmanual-cliente').value.trim();
   const telefone=document.getElementById('logmanual-telefone').value.trim();
-
   if(!pedido||!recordId||!cliente||!telefone){showToast('Preencha todos os campos obrigatórios','error');return}
-
   showLoading();
   try{
     const res=await fetch(`${N8N_BASE}/gerar-logistica-reversa`,{
@@ -1189,27 +1159,26 @@ async function gerarLogisticaManual(){
     hideLoading();
   }
 }
-
 function abrirVoucher(recordId){
   const rec=allTrocas.find(r=>r.id===recordId);
   if(!rec) return;
   currentRecord=rec;
-  const f=rec.fields;
-  document.getElementById('modal-voucher-proto').textContent=`${f['Protocolo']||'—'} · ${f['Nome do Cliente']||'—'}`;
-  document.getElementById('modal-voucher-valor').textContent=formatCurrency(f['Valor do Voucher']);
-  document.getElementById('modal-voucher-desc').textContent=f['Peças Declaradas']||'—';
+  const t = normalizeTroca(rec);
+  const prazoColor = t.trocaNoPrazo==='Sim' ? 'var(--green)' : t.trocaNoPrazo==='Não' ? 'var(--red)' : 'var(--ink)';
+  document.getElementById('modal-voucher-proto').textContent=`${t.protocolo} · ${t.cliente}`;
+  document.getElementById('modal-voucher-valor').textContent=formatCurrency(t.valorVoucher);
+  document.getElementById('modal-voucher-desc').textContent=t.pecasDeclaradas;
   document.getElementById('modal-voucher-grid').innerHTML=`
-    <div class="detail-item"><label>Pedido Original</label><div class="value">#${f['Número do Pedido']||'—'}</div></div>
-    <div class="detail-item"><label>2ª Troca?</label><div class="value">${f['is2atroca']?'Sim — apenas voucher':'Não — 1ª troca'}</div></div>
-    <div class="detail-item"><label>Valor Original</label><div class="value">${formatCurrency(f['Valor do Voucher'])}</div></div>
-    <div class="detail-item"><label>Troca no Prazo</label><div class="value">${f['Troca no Prazo']||'—'}</div></div>
+    <div class="detail-item"><label>Pedido Original</label><div class="value">#${t.pedido}</div></div>
+    <div class="detail-item"><label>2ª Troca?</label><div class="value">${t.is2atroca?'Sim — apenas voucher':'Não — 1ª troca'}</div></div>
+    <div class="detail-item"><label>Valor Original</label><div class="value">${formatCurrency(t.valorVoucher)}</div></div>
+    <div class="detail-item"><label>Troca no Prazo</label><div class="value" style="color:${prazoColor}">${t.trocaNoPrazo}</div></div>
   `;
   openModal('modal-voucher');
 }
-
 async function validarEEnviarVoucher(){
   if(!currentRecord) return;
-  const f=currentRecord.fields;
+  const t = normalizeTroca(currentRecord);
   showLoading();
   try{
     await fetch(`${N8N_BASE}/gerar-voucher`,{
@@ -1217,9 +1186,9 @@ async function validarEEnviarVoucher(){
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         airtable_record_id:currentRecord.id,
-        numero_pedido:f['Número do Pedido'],
-        cliente:f['Nome do Cliente'],
-        valor_voucher:f['Valor do Voucher']
+        numero_pedido:t.pedido,
+        cliente:t.cliente,
+        valor_voucher:t.valorVoucher
       })
     });
     closeModal('modal-voucher');
@@ -1231,40 +1200,32 @@ async function validarEEnviarVoucher(){
     hideLoading();
   }
 }
-
 function enviarParaRetencao(){
   if(!currentRecord) return;
   abrirRetencao(currentRecord.id);
 }
-
 function abrirRetencao(recordId){
   const rec=allTrocas.find(r=>r.id===recordId);
   if(!rec) return;
   currentRecord=rec;
-  const f=rec.fields;
-  document.getElementById('modal-ret-proto').textContent=`${f['Protocolo']||'—'} · ${f['Nome do Cliente']||'—'}`;
-  document.getElementById('modal-ret-motivo').textContent=`🔴 ${f['Motivo']||'Cliente solicitou retenção.'}`;
+  const t = normalizeTroca(rec);
+  document.getElementById('modal-ret-proto').textContent=`${t.protocolo} · ${t.cliente}`;
+  document.getElementById('modal-ret-motivo').textContent=`🔴 ${t.motivo||'Cliente solicitou retenção.'}`;
   document.getElementById('modal-ret-grid').innerHTML=`
-    <div class="detail-item"><label>Peça</label><div class="value">${f['Peças Declaradas']||'—'}</div></div>
-    <div class="detail-item"><label>Pedido</label><div class="value">#${f['Número do Pedido']||'—'}</div></div>
-    <div class="detail-item"><label>Valor Voucher</label><div class="value" style="color:var(--green);font-weight:700">${formatCurrency(f['Valor do Voucher'])}</div></div>
-    <div class="detail-item"><label>2ª Troca?</label><div class="value">${f['is2atroca']?'Sim — sem estorno possível':'Não'}</div></div>
+    <div class="detail-item"><label>Peça</label><div class="value">${t.pecasDeclaradas}</div></div>
+    <div class="detail-item"><label>Pedido</label><div class="value">#${t.pedido}</div></div>
+    <div class="detail-item"><label>Valor Voucher</label><div class="value" style="color:var(--green);font-weight:700">${formatCurrency(t.valorVoucher)}</div></div>
+    <div class="detail-item"><label>2ª Troca?</label><div class="value">${t.is2atroca?'Sim — sem estorno possível':'Não'}</div></div>
   `;
-
   const btnEstorno=document.getElementById('btn-autorizar-estorno');
-  btnEstorno.style.display=f['is2atroca']?'none':'flex';
-
+  btnEstorno.style.display=t.is2atroca?'none':'flex';
   document.getElementById('modal-ret-obs').value='';
-
-  // Mostrar apenas para gerência e admin
   const setor=currentUser.setor;
   const podeDecidirDoc=['Admin','Gerência'].includes(setor);
   document.getElementById('btn-autorizar-voucher').style.display=podeDecidirDoc?'flex':'none';
-  document.getElementById('btn-autorizar-estorno').style.display=(podeDecidirDoc&&!f['is2atroca'])?'flex':'none';
-
+  document.getElementById('btn-autorizar-estorno').style.display=(podeDecidirDoc&&!t.is2atroca)?'flex':'none';
   openModal('modal-retencao');
 }
-
 async function autorizarVoucher(){
   if(!currentRecord) return;
   showLoading();
@@ -1283,7 +1244,6 @@ async function autorizarVoucher(){
     hideLoading();
   }
 }
-
 async function autorizarEstorno(){
   if(!currentRecord) return;
   showLoading();
@@ -1302,18 +1262,16 @@ async function autorizarEstorno(){
     hideLoading();
   }
 }
-
 function abrirConferencia(recordId){
   const rec=allTrocas.find(r=>r.id===recordId);
   if(!rec) return;
   currentRecord=rec;
-  const f=rec.fields;
-  document.getElementById('modal-conf-proto').textContent=`${f['Protocolo']||'—'} · ${f['Nome do Cliente']||'—'}`;
+  const t = normalizeTroca(rec);
+  document.getElementById('modal-conf-proto').textContent=`${t.protocolo} · ${t.cliente}`;
   document.getElementById('modal-conf-alert').textContent=`📦 Peça chegou. Confira cada item e registre a condição.`;
-  document.getElementById('modal-conf-logistica').textContent=f['Código de Logística']||'—';
-
-  const pecas=(f['Peças Declaradas']||'').split('\n').filter(Boolean);
-  const codigos=(f['Códigos Declarados']||'').split('\n').filter(Boolean);
+  document.getElementById('modal-conf-logistica').textContent=t.codigoLogistica||'—';
+  const pecas=(t.pecasDeclaradas==='—'?'':t.pecasDeclaradas).split('\n').filter(Boolean);
+  const codigos=(t.codigosDeclarados||'').split('\n').filter(Boolean);
   document.getElementById('modal-conf-items').innerHTML=pecas.map((p,i)=>`
     <label class="check-item" onclick="toggleCheck(this)">
       <input type="checkbox">
@@ -1321,12 +1279,10 @@ function abrirConferencia(recordId){
       <div class="item-code">${codigos[i]||''}</div>
     </label>
   `).join('');
-
   document.getElementById('modal-conf-condicao').value='';
   document.getElementById('modal-conf-obs').value='';
   openModal('modal-conferencia');
 }
-
 async function confirmarRecebimento(){
   if(!currentRecord) return;
   const condicao=document.getElementById('modal-conf-condicao').value;
@@ -1347,31 +1303,28 @@ async function confirmarRecebimento(){
     hideLoading();
   }
 }
-
 function abrirEstorno(recordId){
   const rec=allTrocas.find(r=>r.id===recordId);
   if(!rec) return;
   currentRecord=rec;
-  const f=rec.fields;
-  document.getElementById('modal-est-proto').textContent=`${f['Protocolo']||'—'} · ${f['Nome do Cliente']||'—'}`;
+  const t = normalizeTroca(rec);
+  document.getElementById('modal-est-proto').textContent=`${t.protocolo} · ${t.cliente}`;
   document.getElementById('modal-est-info').textContent=`ℹ️ Estorno autorizado pela Gerência. Processe no Pagar.me e registre o comprovante.`;
   document.getElementById('modal-est-grid').innerHTML=`
-    <div class="detail-item"><label>Valor do Estorno</label><div class="value" style="color:var(--red);font-weight:700;font-size:20px">${formatCurrency(f['Valor do Voucher'])}</div></div>
-    <div class="detail-item"><label>Pedido</label><div class="value">#${f['Número do Pedido']||'—'}</div></div>
-    <div class="detail-item"><label>Cliente</label><div class="value">${f['Nome do Cliente']||'—'}</div></div>
-    <div class="detail-item"><label>E-mail</label><div class="value">${f['Email']||'—'}</div></div>
+    <div class="detail-item"><label>Valor do Estorno</label><div class="value" style="color:var(--red);font-weight:700;font-size:20px">${formatCurrency(t.valorVoucher)}</div></div>
+    <div class="detail-item"><label>Pedido</label><div class="value">#${t.pedido}</div></div>
+    <div class="detail-item"><label>Cliente</label><div class="value">${t.cliente}</div></div>
+    <div class="detail-item"><label>E-mail</label><div class="value">${t.email}</div></div>
   `;
   document.getElementById('modal-est-comprovante').value='';
   document.getElementById('modal-est-obs').value='';
   document.getElementById('file-preview-est').style.display='none';
   openModal('modal-estorno');
 }
-
 async function confirmarEstorno(){
   if(!currentRecord) return;
   const comprovante=document.getElementById('modal-est-comprovante').value.trim();
   if(!comprovante){showToast('Informe o número do comprovante','warning');return}
-
   showLoading();
   try{
     const f=currentRecord.fields;
@@ -1380,10 +1333,8 @@ async function confirmarEstorno(){
       'Comprovante Estorno':comprovante,
       'Observação Financeiro':document.getElementById('modal-est-obs').value||undefined
     });
-
     // Notificar cliente via n8n (futuramente)
     // await fetch(`${N8N_BASE}/notificar-estorno`, {...})
-
     closeModal('modal-estorno');
     showToast('Estorno confirmado! Cliente será notificada via WhatsApp e e-mail.','success');
     setTimeout(()=>carregarDados(),1500);
@@ -1393,7 +1344,6 @@ async function confirmarEstorno(){
     hideLoading();
   }
 }
-
 async function lancarTrocaManual(){
   const pedido=document.getElementById('nova-pedido').value.trim();
   const cliente=document.getElementById('nova-cliente').value.trim();
@@ -1404,9 +1354,7 @@ async function lancarTrocaManual(){
   const peca=document.getElementById('nova-peca').value.trim();
   const codigo=document.getElementById('nova-codigo').value.trim();
   const tamanho=document.getElementById('nova-tamanho').value.trim();
-
   if(!pedido||!cliente||!motivo||!peca){showToast('Preencha os campos obrigatórios','warning');return}
-
   showLoading();
   try{
     const res=await fetch(`${N8N_BASE}/abre-troca`,{
@@ -1436,14 +1384,12 @@ async function lancarTrocaManual(){
     hideLoading();
   }
 }
-
 // ===== HELPERS =====
 function toggleCheck(el){
   const cb=el.querySelector('input[type=checkbox]');
   cb.checked=!cb.checked;
   el.classList.toggle('checked',cb.checked);
 }
-
 function previewFile(input){
   const preview=document.getElementById('file-preview-est');
   if(input.files&&input.files[0]){
