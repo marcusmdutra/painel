@@ -233,7 +233,7 @@ select.form-control{cursor:pointer}
         <input type="text" placeholder="Buscar protocolo, cliente, pedido..." id="search-input" oninput="filtrarTabela()">
       </div>
       <button class="btn btn-secondary btn-sm" onclick="recarregarDados()">🔄 Atualizar</button>
-      <button class="btn btn-primary" id="btn-nova-troca" onclick="openModal('modal-nova-troca')" style="display:none">+ Nova Troca</button>
+      <button class="btn btn-primary" id="btn-nova-troca" onclick="openNovaTrocaModal()" style="display:none">+ Nova Troca</button>
     </div>
     <div class="page-content">
       <!-- DASHBOARD GERAL -->
@@ -251,7 +251,7 @@ select.form-control{cursor:pointer}
           <button class="filter-btn" onclick="setFilter(this,'Emissão da Logística Reversa')">Emissão Logística</button>
           <button class="filter-btn" onclick="setFilter(this,'Aguardando cliente')">Aguardando Cliente</button>
           <button class="filter-btn" onclick="setFilter(this,'Peça recebida')">Peça Recebida</button>
-          <button class="filter-btn" onclick="setFilter(this,'Aguardando voucher')">Aguardando Voucher</button>
+          <button class="filter-btn" onclick="setFilter(this,'Aguardando validação voucher')">Validação Voucher</button>
           <button class="filter-btn" onclick="setFilter(this,'Em retenção')">Em Retenção</button>
           <button class="filter-btn" onclick="setFilter(this,'Aguardando estorno')">Aguardando Estorno</button>
           <button class="filter-btn" onclick="setFilter(this,'Finalizado')">Finalizado</button>
@@ -281,7 +281,7 @@ select.form-control{cursor:pointer}
             <h3>Fila Falecom <span class="count" id="count-falecom"></span></h3>
             <div class="actions-row">
               <button class="btn btn-warning btn-sm" onclick="openModal('modal-logistica-manual')">📬 Gerar Logística Manual</button>
-              <button class="btn btn-primary" onclick="openModal('modal-nova-troca')">+ Lançar Troca Manual</button>
+              <button class="btn btn-primary" onclick="openNovaTrocaModal()">+ Lançar Troca Manual</button>
             </div>
           </div>
           <table>
@@ -549,39 +549,47 @@ select.form-control{cursor:pointer}
       <button class="modal-close" onclick="closeModal('modal-nova-troca')">✕</button>
     </div>
     <div class="modal-body">
-      <div class="alert alert-info">ℹ️ Ao lançar, o sistema vai consultar o pedido na Irroba e abrir a troca automaticamente.</div>
+      <div class="alert alert-info">ℹ️ Digite o pedido, consulte a Irroba, selecione uma ou mais peças e o painel seguirá a mesma lógica dos fluxos automáticos.</div>
       <div class="form-row">
         <div class="form-group"><label>Número do Pedido *</label><input type="text" class="form-control" id="nova-pedido" placeholder="Ex: 32846"></div>
-        <div class="form-group"><label>Nome da Cliente *</label><input type="text" class="form-control" id="nova-cliente" placeholder="Nome completo"></div>
+        <div class="form-group" style="display:flex;align-items:end"><button class="btn btn-secondary" type="button" onclick="consultarPedidoNovaTroca()">🔎 Consultar Pedido</button></div>
       </div>
-      <div class="form-row">
-        <div class="form-group"><label>E-mail</label><input type="email" class="form-control" id="nova-email" placeholder="email@exemplo.com"></div>
-        <div class="form-group"><label>Telefone (WhatsApp)</label><input type="text" class="form-control" id="nova-telefone" placeholder="(11) 99999-9999"></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label>Motivo *</label>
-          <select class="form-control" id="nova-motivo">
-            <option value="">Selecione...</option>
-            <option>Tamanho não serviu</option>
-            <option>Produto com defeito</option>
-            <option>Produto diferente do pedido</option>
-            <option>Não gostou do produto</option>
-            <option>Outro</option>
-          </select>
+      <div id="nova-pedido-status" class="alert alert-info" style="display:none"></div>
+      <div id="nova-pedido-dados" style="display:none">
+        <div class="form-row">
+          <div class="form-group"><label>Nome da Cliente *</label><input type="text" class="form-control" id="nova-cliente" placeholder="Nome completo"></div>
+          <div class="form-group"><label>E-mail</label><input type="email" class="form-control" id="nova-email" placeholder="email@exemplo.com"></div>
         </div>
-        <div class="form-group"><label>Desejo da Cliente *</label>
-          <select class="form-control" id="nova-desejo">
-            <option>Troca por outro tamanho</option>
-            <option>Troca por outro produto</option>
-            <option>Devolução com voucher</option>
-            <option>Devolução com estorno</option>
-          </select>
+        <div class="form-row">
+          <div class="form-group"><label>Telefone (WhatsApp)</label><input type="text" class="form-control" id="nova-telefone" placeholder="(11) 99999-9999"></div>
+          <div class="form-group"><label>Tipo do Pedido</label><input type="text" class="form-control" id="nova-tipo-pedido" placeholder="1ª troca / 2ª troca" readonly></div>
         </div>
-      </div>
-      <div class="form-group"><label>Nome da Peça *</label><input type="text" class="form-control" id="nova-peca" placeholder="Ex: Camisa Mafe Zebra"></div>
-      <div class="form-row">
-        <div class="form-group"><label>Código da Variação</label><input type="text" class="form-control" id="nova-codigo" placeholder="Ex: TA241646-3"></div>
-        <div class="form-group"><label>Tamanho</label><input type="text" class="form-control" id="nova-tamanho" placeholder="Ex: 46"></div>
+        <div class="form-group">
+          <label>Peças do Pedido *</label>
+          <div id="nova-produtos-lista" style="display:grid;gap:10px"></div>
+        </div>
+        <div id="nova-produtos-resumo" class="alert alert-warning" style="display:none"></div>
+        <div class="form-row">
+          <div class="form-group"><label>Motivo *</label>
+            <select class="form-control" id="nova-motivo">
+              <option value="">Selecione...</option>
+              <option>Tamanho não serviu</option>
+              <option>Produto com defeito</option>
+              <option>Produto diferente do pedido</option>
+              <option>Não gostou do produto</option>
+              <option>Outro</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Desejo da Cliente *</label>
+            <select class="form-control" id="nova-desejo">
+              <option>Troca por outro tamanho</option>
+              <option>Troca por outro produto</option>
+              <option>Devolução com voucher</option>
+              <option>Devolução com estorno</option>
+            </select>
+          </div>
+        </div>
+        <div id="nova-regra-msg" class="alert alert-info" style="display:none"></div>
       </div>
     </div>
     <div class="modal-foot">
@@ -608,6 +616,7 @@ let allTrocas = [];
 let allCarrinhos = [];
 let currentFilter = '';
 let currentRecord = null;
+let novaTrocaContext = { pedido:null, prazo:null, produtos:[] };
 // ===== UTILS =====
 function showLoading(){document.getElementById('loading').style.display='flex'}
 function hideLoading(){document.getElementById('loading').style.display='none'}
@@ -620,6 +629,116 @@ function showToast(msg, type=''){
 }
 function openModal(id){document.getElementById(id).classList.add('open');document.body.style.overflow='hidden'}
 function closeModal(id){document.getElementById(id).classList.remove('open');document.body.style.overflow=''}
+function openNovaTrocaModal(){
+  resetNovaTrocaModal();
+  openModal('modal-nova-troca');
+}
+function resetNovaTrocaModal(){
+  novaTrocaContext = { pedido:null, prazo:null, produtos:[] };
+  ['nova-pedido','nova-cliente','nova-email','nova-telefone'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  const motivo=document.getElementById('nova-motivo'); if(motivo) motivo.value='';
+  const desejo=document.getElementById('nova-desejo'); if(desejo) desejo.selectedIndex=0;
+  const tipo=document.getElementById('nova-tipo-pedido'); if(tipo) tipo.value='';
+  const lista=document.getElementById('nova-produtos-lista'); if(lista) lista.innerHTML='';
+  const dados=document.getElementById('nova-pedido-dados'); if(dados) dados.style.display='none';
+  const status=document.getElementById('nova-pedido-status'); if(status){ status.style.display='none'; status.className='alert alert-info'; status.textContent=''; }
+  const resumo=document.getElementById('nova-produtos-resumo'); if(resumo){ resumo.style.display='none'; resumo.textContent=''; }
+  const regra=document.getElementById('nova-regra-msg'); if(regra){ regra.style.display='none'; regra.textContent=''; regra.className='alert alert-info'; }
+}
+function escapeHtml(value=''){
+  return String(value ?? '')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+function showNovaTrocaStatus(message, type='info'){
+  const el=document.getElementById('nova-pedido-status');
+  if(!el) return;
+  el.className='alert ' + (type==='error' ? 'alert-danger' : type==='warning' ? 'alert-warning' : 'alert-info');
+  el.textContent=message;
+  el.style.display='block';
+}
+function showNovaTrocaRegra(message, type='info'){
+  const el=document.getElementById('nova-regra-msg');
+  if(!el) return;
+  el.className='alert ' + (type==='error' ? 'alert-danger' : type==='warning' ? 'alert-warning' : 'alert-info');
+  el.textContent=message;
+  el.style.display='block';
+}
+function renderNovaTrocaProdutos(produtos=[]){
+  const lista=document.getElementById('nova-produtos-lista');
+  if(!lista) return;
+  lista.innerHTML = produtos.map((produto,index)=>`
+    <label class="check-item">
+      <input type="checkbox" data-index="${index}" onchange="syncCheckItem(this);atualizarResumoNovaTroca()">
+      <div class="item-name">${escapeHtml(produto.nome || 'Peça sem nome')}</div>
+      <div class="item-code">${escapeHtml(produto.codigoVariacao || produto.modelo || 'Sem código')} · ${escapeHtml(produto.tamanho || 'Sem tamanho')} · ${escapeHtml(formatCurrency(produto.valorVoucher || 0))}</div>
+    </label>
+  `).join('');
+  atualizarResumoNovaTroca();
+}
+function getProdutosSelecionadosNovaTroca(){
+  const produtos=novaTrocaContext?.produtos || [];
+  return [...document.querySelectorAll('#nova-produtos-lista input[type=checkbox]:checked')]
+    .map(input => produtos[Number(input.dataset.index)])
+    .filter(Boolean);
+}
+function atualizarResumoNovaTroca(){
+  const resumo=document.getElementById('nova-produtos-resumo');
+  if(!resumo) return;
+  const selecionados=getProdutosSelecionadosNovaTroca();
+  if(!selecionados.length){
+    resumo.style.display='none';
+    resumo.textContent='';
+    return;
+  }
+  const total=selecionados.reduce((sum,p)=>sum + parseCurrencyValue(p.valorVoucher || 0),0);
+  resumo.className='alert alert-warning';
+  resumo.textContent=`${selecionados.length} peça(s) selecionada(s) · Valor potencial do voucher: ${formatCurrency(total)}`;
+  resumo.style.display='block';
+}
+async function postJson(url, body){
+  const res=await fetch(url,{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+  const data=await res.json().catch(()=>({}));
+  if(!res.ok) throw new Error(data.error || data.message || 'Erro na requisição');
+  return data;
+}
+function extractWorkflowPayload(data){
+  if(Array.isArray(data)) return data[0] || {};
+  if(data && typeof data==='object' && Array.isArray(data.data)) return data.data[0] || {};
+  if(data && typeof data==='object' && data.data && typeof data.data==='object' && !Array.isArray(data.data)) return data.data;
+  if(data && typeof data==='object' && data.body && typeof data.body==='object') return data.body;
+  return data || {};
+}
+async function consultarPedidoNovaTroca(){
+  const pedido=(document.getElementById('nova-pedido')?.value || '').trim();
+  if(!pedido){ showToast('Informe o número do pedido','warning'); return; }
+  showLoading();
+  try{
+    showNovaTrocaStatus('Consultando pedido na Irroba...','info');
+    const data=await postJson(`${N8N_BASE}/consulta-pedido`, { numero_pedido: pedido });
+    const pedidoData=extractWorkflowPayload(data);
+    const produtos=Array.isArray(pedidoData.produtos) ? pedidoData.produtos : [];
+    if(!produtos.length) throw new Error('Nenhuma peça foi encontrada para esse pedido.');
+    novaTrocaContext = { pedido: pedidoData, prazo:null, produtos };
+    document.getElementById('nova-cliente').value=pedidoData.cliente || '';
+    document.getElementById('nova-email').value=pedidoData.email || '';
+    document.getElementById('nova-telefone').value=pedidoData.telefone || '';
+    document.getElementById('nova-tipo-pedido').value=pedidoData.is2atroca ? '2ª troca' : '1ª troca';
+    document.getElementById('nova-pedido-dados').style.display='block';
+    renderNovaTrocaProdutos(produtos);
+    showNovaTrocaStatus(`${produtos.length} peça(s) encontrada(s) para o pedido ${pedido}. Selecione o que a cliente quer devolver/trocar.`,'info');
+  }catch(e){
+    console.error('Erro ao consultar pedido:', e);
+    showNovaTrocaStatus(e.message || 'Erro ao consultar o pedido na Irroba.','error');
+    document.getElementById('nova-pedido-dados').style.display='none';
+  }finally{
+    hideLoading();
+  }
+}
+
 function formatDate(str){
   if(!str) return '—';
   try{
@@ -663,6 +782,7 @@ function canonicalStatus(status=''){
   if(s==='aguardando cliente') return 'Aguardando cliente';
   if(s==='peca recebida') return 'Peça recebida';
   if(s==='aguardando voucher') return 'Aguardando voucher';
+  if(s==='aguardando validacao voucher') return 'Aguardando validação voucher';
   if(s==='voucher gerado') return 'Voucher gerado';
   if(s==='em retencao') return 'Em retenção';
   if(s==='aguardando estorno') return 'Aguardando estorno';
@@ -682,6 +802,7 @@ function badgeStatus(status){
     'Aguardando cliente':'badge-transit',
     'Peça recebida':'badge-received',
     'Aguardando voucher':'badge-voucher',
+    'Aguardando validação voucher':'badge-voucher',
     'Voucher gerado':'badge-voucher',
     'Em retenção':'badge-retention',
     'Aguardando estorno':'badge-refund',
@@ -743,6 +864,7 @@ function getCurrentTimelineStatusLabel(status=''){
   const s=canonicalStatus(status);
   if(s==='Aguardando código de logística') return 'Aguardando código de logística';
   if(s==='Aguardando voucher') return 'Aguardando voucher';
+  if(s==='Aguardando validação voucher') return 'Aguardando validação voucher';
   if(s==='Voucher gerado') return 'Voucher gerado';
   if(s==='Em retenção') return 'Em retenção';
   if(s==='Aguardando estorno') return 'Aguardando estorno';
@@ -800,21 +922,28 @@ function normalizeTroca(rec){
     dataAguardandoCliente: firstFilled(f['Data Aguardando Cliente'], f['Data de Postagem'], f['Data Postagem'], ''),
     dataRecebimento: firstFilled(f['Data do Recebimento na Empresa'], f['Data de Recebimento na Empresa'], f['Data Recebimento na Empresa'], f['Data Recebimento'], ''),
     dataVoucher: firstFilled(f['Data Voucher Gerado'], f['Data Voucher'], f['Data de Envio do Voucher'], f['Data Validação Voucher'], ''),
+    dataEntradaValidacaoVoucher: firstFilled(f['Data Entrada Validação Voucher'], ''),
+    dataSaidaValidacaoVoucher: firstFilled(f['Data Saída Validação Voucher'], ''),
+    dataVoucherEnviado: firstFilled(f['Data Voucher Enviado'], ''),
     dataRetencao: firstFilled(f['Data Retenção Gerência'], f['Data Retenção'], f['Data de Retenção'], ''),
     dataAguardandoEstorno: firstFilled(f['Data Aguardando Estorno'], ''),
     dataEstornoAutorizado: firstFilled(f['Data Estorno Autorizado'], ''),
     dataEstorno: firstFilled(f['Data Estorno Confirmado'], f['Data Estorno'], f['Data de Estorno'], f['Data Estorno Realizado'], ''),
-    dataFinalizacao: firstFilled(f['Data Finalização'], f['Data de Finalização'], f['Conclusão'], ''),
+    dataFinalizacao: firstFilled(f['Data Finalização'], f['Data de Finalização'], ''),
     linhaSolicitacao: firstFilled(f['Linha Formatada – Cliente solicitou logística'], ''),
     linhaLogistica: firstFilled(f['Linha Formatada – Logística Reversa Gerada'], ''),
     linhaAguardandoCliente: firstFilled(f['Linha Formatada – Aguardando Cliente'], ''),
     linhaPecaRecebida: firstFilled(f['Linha Formatada – Peça Recebida'], ''),
     linhaVoucher: firstFilled(f['Linha Formatada – Voucher Gerado'], ''),
+    linhaAguardandoValidacaoVoucher: firstFilled(f['Linha Formatada – Aguardando Validação Voucher'], ''),
+    linhaVoucherAprovado: firstFilled(f['Linha Formatada – Voucher Aprovado'], ''),
+    linhaVoucherEnviado: firstFilled(f['Linha Formatada – Voucher Enviado'], ''),
     linhaRetencao: firstFilled(f['Linha Formatada – Em Retenção pela Gerência'], ''),
     linhaAguardandoEstorno: firstFilled(f['Linha Formatada – Aguardando Estorno'], ''),
     linhaEstornoAutorizado: firstFilled(f['Linha Formatada – Estorno Autorizado'], ''),
     linhaEstornoConfirmado: firstFilled(f['Linha Formatada – Estorno Confirmado'], ''),
     linhaFinalizacao: firstFilled(f['Linha Formatada – Solicitação Finalizada'], ''),
+    voucherCodigo: firstFilled(f['Voucher'], ''),
   };
 }
 function isRefundRequest(t){
@@ -829,14 +958,17 @@ function getVoucherAmount(t){
 }
 function buildTimelineHtml(t){
   const entries = [];
+  const existingKeys = new Set();
   const pushLine = (key, lineValue, fallbackLabel, fallbackDate='') => {
     const parsed = parseFormattedTimelineLine(lineValue, fallbackLabel);
     if(parsed){
       entries.push({ key, label: parsed.label, meta: parsed.date || parsed.raw, state: 'done' });
+      existingKeys.add(key);
       return;
     }
     if(fallbackDate){
       entries.push({ key, label: fallbackLabel, meta: formatDate(fallbackDate), state: 'done' });
+      existingKeys.add(key);
     }
   };
   pushLine('solicitacao', t.linhaSolicitacao, 'Cliente solicitou logística', t.dataAbertura);
@@ -844,27 +976,52 @@ function buildTimelineHtml(t){
   pushLine('aguardando_cliente', t.linhaAguardandoCliente, 'Aguardando retorno do cliente', t.dataAguardandoCliente);
   pushLine('peca_recebida', t.linhaPecaRecebida, 'Peça Recebida', t.dataRecebimento);
   pushLine('voucher_gerado', t.linhaVoucher, 'Voucher Gerado', t.dataVoucher);
+  pushLine('aguardando_validacao_voucher', t.linhaAguardandoValidacaoVoucher, 'Aguardando Validação Voucher', t.dataEntradaValidacaoVoucher);
+  pushLine('voucher_aprovado', t.linhaVoucherAprovado, 'Voucher Aprovado', t.dataSaidaValidacaoVoucher);
+  pushLine('voucher_enviado', t.linhaVoucherEnviado, 'Voucher Enviado', t.dataVoucherEnviado);
   pushLine('retencao', t.linhaRetencao, 'Em Retenção pela Gerência', t.dataRetencao);
   pushLine('aguardando_estorno', t.linhaAguardandoEstorno, 'Aguardando Estorno', t.dataAguardandoEstorno);
   pushLine('estorno_autorizado', t.linhaEstornoAutorizado, 'Estorno Autorizado pela Gerência', t.dataEstornoAutorizado);
   pushLine('estorno_confirmado', t.linhaEstornoConfirmado, 'Estorno Confirmado', t.dataEstorno);
-  pushLine('finalizado', t.linhaFinalizacao, 'Solicitação finalizada ✅', t.dataFinalizacao);
+  if(t.linhaFinalizacao){
+    pushLine('finalizado', t.linhaFinalizacao, 'Solicitação finalizada ✅', t.dataFinalizacao);
+  }
 
-  const currentLabel = getCurrentTimelineStatusLabel(t.status);
-  const alreadyRepresented = entries.some(entry => statusToken(entry.label).includes(statusToken(currentLabel)));
-  if(!alreadyRepresented && !statusMatches(t.status, 'Finalizado')){
-    entries.push({ key:'status_atual', label: currentLabel, meta: 'Status atual', state:'current' });
+  const statusKeyMap = {
+    'Aguardando código de logística': 'solicitacao',
+    'Emissão da Logística Reversa': 'emissao',
+    'Aguardando cliente': 'aguardando_cliente',
+    'Peça recebida': 'peca_recebida',
+    'Aguardando voucher': 'voucher_processando',
+    'Aguardando validação voucher': 'aguardando_validacao_voucher',
+    'Voucher gerado': 'voucher_gerado',
+    'Em retenção': 'retencao',
+    'Aguardando estorno': 'aguardando_estorno',
+    'Estorno autorizado': 'estorno_autorizado',
+    'Estorno Realizado': 'estorno_confirmado',
+    'Finalizado': 'finalizado'
+  };
+  const currentStatus = canonicalStatus(t.status);
+  const currentKey = statusKeyMap[currentStatus] || 'status_atual';
+  if(!existingKeys.has(currentKey)){
+    entries.push({
+      key: currentKey,
+      label: getCurrentTimelineStatusLabel(currentStatus),
+      meta: currentStatus==='Finalizado' && t.dataFinalizacao ? formatDate(t.dataFinalizacao) : 'Status atual',
+      state: 'current'
+    });
   }
   if(!entries.length){
     entries.push({
       key:'status_atual',
-      label: currentLabel,
+      label: getCurrentTimelineStatusLabel(currentStatus),
       meta: t.dataAbertura ? formatDate(t.dataAbertura) : 'Sem data registrada',
       state:'current'
     });
   }
   return entries.map(entry => buildTimelineItem(entry.label, entry.meta, entry.state)).join('');
 }
+
 // ===== LOGIN =====
 async function fazerLogin(){
   const email=document.getElementById('login-email').value.trim();
@@ -1010,7 +1167,7 @@ function renderGeral(){
     const t = normalizeTroca(r);
     const s=t.status||'';
     if(!statusMatches(s,'Finalizado')) total++;
-    if(statusMatches(s,'Aguardando código de logística','Peça recebida','Aguardando voucher','Aguardando estorno')) acao++;
+    if(statusMatches(s,'Aguardando código de logística','Peça recebida','Aguardando voucher','Aguardando validação voucher','Aguardando estorno')) acao++;
     if(statusMatches(s,'Finalizado') && new Date(t.dataAbertura||t.createdTime).toDateString()===hoje) finHoje++;
     if(statusMatches(s,'Aguardando cliente')) transito++;
     if(statusMatches(s,'Em retenção')) retencao++;
@@ -1038,8 +1195,8 @@ function renderGeral(){
 }
 // ===== RENDER FALECOM =====
 function renderFalecom(){
-  const fila=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Aguardando código de logística','Aguardando voucher','Em retenção','Emissão da Logística Reversa'));
-  const vouchers=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Aguardando voucher')).length;
+  const fila=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Aguardando código de logística','Aguardando validação voucher','Em retenção','Emissão da Logística Reversa'));
+  const vouchers=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Aguardando validação voucher')).length;
   const semLog=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Aguardando código de logística')).length;
   const ret=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Em retenção')).length;
   document.getElementById('stat-falecom-voucher').textContent=vouchers;
@@ -1182,7 +1339,7 @@ function renderCarrinhos(){
 // ===== BADGES =====
 function atualizarBadges(){
   const counts={
-    falecom: allTrocas.filter(r=>['Aguardando código de logística','Aguardando voucher','Em retenção'].includes(normalizeTroca(r).status||'')).length,
+    falecom: allTrocas.filter(r=>['Aguardando código de logística','Aguardando validação voucher','Em retenção'].includes(normalizeTroca(r).status||'')).length,
     logistica: allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Peça recebida')).length,
     financeiro: allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Aguardando estorno','Estorno autorizado')).length,
     gerencia: allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Em retenção')).length,
@@ -1273,38 +1430,22 @@ function abrirVoucher(recordId){
   document.getElementById('modal-voucher-proto').textContent=`${t.protocolo} · ${t.cliente}`;
   document.getElementById('modal-voucher-valor').textContent=formatCurrency(t.valorVoucher);
   document.getElementById('modal-voucher-desc').textContent=t.pecasDeclaradas;
+  const voucherInfo = t.voucherCodigo ? `<div class="detail-item full"><label>Voucher Gerado</label><div class="value" style="font-family:'DM Mono',monospace;color:var(--green);font-weight:700">${t.voucherCodigo}</div></div>` : '';
   document.getElementById('modal-voucher-grid').innerHTML=`
     <div class="detail-item"><label>Pedido Original</label><div class="value">#${t.pedido}</div></div>
     <div class="detail-item"><label>2ª Troca?</label><div class="value">${t.is2atroca?'Sim — apenas voucher':'Não — 1ª troca'}</div></div>
     <div class="detail-item"><label>Valor Original</label><div class="value">${formatCurrency(t.valorVoucher)}</div></div>
     <div class="detail-item"><label>Troca no Prazo</label><div class="value" style="color:${prazoColor}">${t.trocaNoPrazo}</div></div>
+    ${voucherInfo}
   `;
   openModal('modal-voucher');
 }
 async function validarEEnviarVoucher(){
   if(!currentRecord) return;
-  const t = normalizeTroca(currentRecord);
-  showLoading();
-  try{
-    await fetch(`${N8N_BASE}/gerar-voucher`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        airtable_record_id:currentRecord.id,
-        numero_pedido:t.pedido,
-        cliente:t.cliente,
-        valor_voucher:getVoucherAmount(t)
-      })
-    });
-    closeModal('modal-voucher');
-    showToast('Voucher validado e enviado para a cliente via WhatsApp e e-mail!','success');
-    setTimeout(()=>carregarDados(),3000);
-  }catch(e){
-    showToast('Erro ao enviar voucher','error');
-  }finally{
-    hideLoading();
-  }
+  closeModal('modal-voucher');
+  showToast('Fila corrigida: este caso já está em Aguardando validação voucher. O workflow de envio do voucher ainda precisa ser criado no n8n.','warning');
 }
+
 function enviarParaRetencao(){
   if(!currentRecord) return;
   abrirRetencao(currentRecord.id);
@@ -1334,40 +1475,37 @@ function abrirRetencao(recordId){
 async function autorizarVoucher(){
   if(!currentRecord) return;
   const t = normalizeTroca(currentRecord);
-  const valorVoucher = getVoucherAmount(t);
+  const obs=document.getElementById('modal-ret-obs')?.value?.trim() || '';
   showLoading();
   try{
-    await updateAirtable(BASE_TROCAS, TABLE_TROCAS, currentRecord.id, {
-      'Status Atual':'Aguardando voucher'
-    });
-
-    if(valorVoucher > 0){
-      try{
-        await fetch(`${N8N_BASE}/gerar-voucher`,{
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({
-            airtable_record_id:currentRecord.id,
-            numero_pedido:t.pedido,
-            cliente:t.cliente,
-            valor_voucher:valorVoucher
-          })
-        });
-        closeModal('modal-retencao');
-        showToast('Voucher autorizado e geração automática acionada!','success');
-        setTimeout(()=>carregarDados(),2500);
-      }catch(err){
-        console.error('Erro ao acionar gerar-voucher:', err);
-        closeModal('modal-retencao');
-        showToast('Voucher autorizado, mas a geração automática falhou. Caso ficou em Aguardando voucher.','warning');
-        setTimeout(()=>carregarDados(),2000);
-      }
+    if(obs){
+      await updateAirtable(BASE_TROCAS, TABLE_TROCAS, currentRecord.id, {
+        'Observação Gerência': obs,
+        'Data Atualização Manual': new Date().toISOString()
+      });
+    }
+    if(t.voucherCodigo){
+      await updateAirtable(BASE_TROCAS, TABLE_TROCAS, currentRecord.id, {
+        'Status Atual': 'Aguardando validação voucher'
+      });
+      closeModal('modal-retencao');
+      showToast('Voucher já existente. Caso devolvido para a fila do Falecom.','success');
+      setTimeout(()=>carregarDados(),1500);
       return;
     }
-
+    await fetch(`${N8N_BASE}/gerar-voucher`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        airtable_record_id:currentRecord.id,
+        numero_pedido:t.pedido,
+        cliente:t.cliente,
+        valor_voucher:getVoucherAmount(t)
+      })
+    });
     closeModal('modal-retencao');
-    showToast('Voucher autorizado! Caso movido para Aguardando voucher.','success');
-    setTimeout(()=>carregarDados(),1500);
+    showToast('Voucher autorizado! Geração acionada para retornar ao Falecom.','success');
+    setTimeout(()=>carregarDados(),2500);
   }catch(e){
     console.error('Erro ao autorizar voucher:', e);
     showToast('Erro ao autorizar voucher','error');
@@ -1375,6 +1513,7 @@ async function autorizarVoucher(){
     hideLoading();
   }
 }
+
 async function autorizarEstorno(){
   if(!currentRecord) return;
   showLoading();
@@ -1533,39 +1672,63 @@ async function lancarTrocaManual(){
   const telefone=document.getElementById('nova-telefone').value.trim();
   const motivo=document.getElementById('nova-motivo').value;
   const desejo=document.getElementById('nova-desejo').value;
-  const peca=document.getElementById('nova-peca').value.trim();
-  const codigo=document.getElementById('nova-codigo').value.trim();
-  const tamanho=document.getElementById('nova-tamanho').value.trim();
-  if(!pedido||!cliente||!motivo||!peca){showToast('Preencha os campos obrigatórios','warning');return}
+  const produtosSelecionados=getProdutosSelecionadosNovaTroca();
+  if(!pedido){showToast('Informe o número do pedido','warning');return}
+  if(!novaTrocaContext?.pedido){showToast('Consulte o pedido antes de lançar a troca','warning');return}
+  if(!cliente||!motivo||!desejo){showToast('Preencha os campos obrigatórios','warning');return}
+  if(!produtosSelecionados.length){showToast('Selecione ao menos 1 peça do pedido','warning');return}
   showLoading();
   try{
-    const res=await fetch(`${N8N_BASE}/abre-troca`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        numero_pedido:pedido, cliente, email, telefone,
-        motivo, desejo, decisao:'primeira_troca_no_prazo',
-        is2atroca:false,
-        produtos:[{nome:peca, codigoVariacao:codigo||'—', tamanho:tamanho||'—', valorVoucher:0}]
-      })
-    });
+    const prazoData=extractWorkflowPayload(await postJson(`${N8N_BASE}/verifica-prazo`, {
+      numero_pedido: pedido,
+      is2atroca: !!novaTrocaContext.pedido.is2atroca
+    }));
+    novaTrocaContext.prazo=prazoData;
+    const mensagemPrazo=prazoData.mensagem || 'Regra de negócio avaliada.';
+    if(prazoData.decisao==='em_transito'){
+      showNovaTrocaRegra(mensagemPrazo,'warning');
+      showToast('Pedido ainda em trânsito. A troca não foi aberta.','warning');
+      return;
+    }
+    const payload={
+      numero_pedido: pedido,
+      cliente,
+      email,
+      telefone,
+      motivo,
+      desejo,
+      decisao: prazoData.decisao || '',
+      is2atroca: !!novaTrocaContext.pedido.is2atroca,
+      produtos: produtosSelecionados
+    };
+    await postJson(`${N8N_BASE}/abre-troca`, payload);
+    const prontoMessageBox=document.getElementById('nova-regra-msg');
+    if(prontoMessageBox){
+      prontoMessageBox.style.display='block';
+      prontoMessageBox.className='alert ' + ((prazoData.decisao==='primeira_troca_no_prazo') ? 'alert-info' : 'alert-warning');
+      prontoMessageBox.textContent=mensagemPrazo;
+    }
     closeModal('modal-nova-troca');
-    showToast('Troca lançada com sucesso! Protocolo gerado.','success');
-    document.getElementById('nova-pedido').value='';
-    document.getElementById('nova-cliente').value='';
-    document.getElementById('nova-email').value='';
-    document.getElementById('nova-telefone').value='';
-    document.getElementById('nova-motivo').value='';
-    document.getElementById('nova-peca').value='';
-    document.getElementById('nova-codigo').value='';
-    document.getElementById('nova-tamanho').value='';
+    if(prazoData.decisao==='primeira_troca_no_prazo'){
+      showToast('Troca lançada com sucesso! Pedido dentro do prazo e logística automática acionada.','success');
+    }else if(prazoData.decisao==='segunda_troca'){
+      showToast('Troca lançada! Segunda troca registrada sem logística automática.','warning');
+    }else if(prazoData.decisao==='fora_do_prazo'){
+      showToast('Troca lançada! Caso fora do prazo registrado sem logística automática.','warning');
+    }else{
+      showToast('Troca lançada com sucesso!','success');
+    }
+    resetNovaTrocaModal();
     setTimeout(()=>carregarDados(),3000);
   }catch(e){
-    showToast('Erro ao lançar troca. Verifique os dados.','error');
+    console.error('Erro ao lançar troca manual:', e);
+    showNovaTrocaRegra(e.message || 'Erro ao lançar a troca manual.','error');
+    showToast('Erro ao lançar troca. Verifique os dados e os fluxos n8n.','error');
   }finally{
     hideLoading();
   }
 }
+
 // ===== HELPERS =====
 function syncCheckItem(input){
   const item=input.closest('.check-item');
