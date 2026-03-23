@@ -1195,7 +1195,7 @@ function renderGeral(){
 }
 // ===== RENDER FALECOM =====
 function renderFalecom(){
-  const fila=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Aguardando código de logística','Aguardando validação voucher','Em retenção','Emissão da Logística Reversa'));
+  const fila=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Aguardando código de logística','Aguardando validação voucher'));
   const vouchers=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Aguardando validação voucher')).length;
   const semLog=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Aguardando código de logística')).length;
   const ret=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Em retenção')).length;
@@ -1213,8 +1213,7 @@ function renderFalecom(){
     const status=t.status||'';
     const codLog=t.codigoLogistica||'';
     let acoes='';
-    if(statusMatches(status,'Aguardando voucher')) acoes=`<button class="btn btn-success btn-sm" onclick="event.stopPropagation();abrirVoucher('${r.id}')">✓ Validar</button>`;
-    else if(statusMatches(status,'Em retenção')) acoes=`<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();abrirRetencao('${r.id}')">Ver →</button>`;
+    if(statusMatches(status,'Aguardando validação voucher')) acoes=`<button class="btn btn-success btn-sm" onclick="event.stopPropagation();abrirVoucher('${r.id}')">✓ Validar voucher</button>`;
     else if(statusMatches(status,'Aguardando código de logística')) acoes=`<button class="btn btn-warning btn-sm" onclick="event.stopPropagation();preencherLogisticaManual('${r.id}')">📬 Gerar</button>`;
     return `<tr onclick="abrirDetalhe('${r.id}')">
       <td class="td-proto">${t.protocolo}</td>
