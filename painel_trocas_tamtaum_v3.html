@@ -378,6 +378,7 @@ select.form-control{cursor:pointer}
     </div>
     <div class="modal-foot">
       <button class="btn btn-secondary" onclick="closeModal('modal-detalhe')">Fechar</button>
+      <button class="btn btn-success" id="btn-validar-voucher-detalhe" onclick="if(currentRecord){closeModal('modal-detalhe');abrirVoucher(currentRecord.id)}" style="display:none">✓ Validar voucher</button>
       <button class="btn btn-warning" id="btn-gerar-logistica-detalhe" onclick="abrirLogisticaManualComDados()" style="display:none">📬 Gerar Código Logística</button>
     </div>
   </div>
@@ -766,10 +767,6 @@ function formatCurrency(v){
   const n=parseCurrencyValue(v);
   return 'R$ '+n.toFixed(2).replace('.',',');
 }
-function cleanFieldValue(value){
-  const normalized=String(value ?? '').trim();
-  return (!normalized || normalized==='—') ? '' : normalized;
-}
 function statusToken(status=''){
   return String(status||'')
     .toLowerCase()
@@ -891,8 +888,8 @@ function normalizeTroca(rec){
     statusRaw: rawStatus,
     status: canonicalStatus(rawStatus),
     protocolo: firstFilled(f['Protocolo'], f['Número Protocolo'], f['Protocolo Jira'], '—'),
-    cliente: firstFilled(f['Nome do Cliente'], f['Cliente'], f['cliente'], f['Nome Cliente'], '—'),
-    pedido: firstFilled(f['Número do Pedido'], f['Pedido'], f['pedido'], '—'),
+    cliente: firstFilled(f['Nome do Cliente'], f['Cliente'], f['cliente'], '—'),
+    pedido: firstFilled(f['Número do Pedido'], f['Pedido'], '—'),
     dataAbertura: firstFilled(f['Data Criação'], f['Data Solicitação'], rec?.createdTime, ''),
     pecasDeclaradas: firstFilled(f['Peças Declaradas'], f['Pecas Declaradas'], f['Itens Declarados'], '—'),
     codigosDeclarados: firstFilled(f['Códigos Declarados'], f['Codigos Declarados'], ''),
@@ -909,24 +906,22 @@ function normalizeTroca(rec){
       ''
     ),
     email: firstFilled(
+      rec?.email,
       f['Email'],
       f['E-mail'],
       f['E-mail do Cliente'],
       f['Email do Cliente'],
       f['cliente_email'],
-      f['email_cliente'],
       f['email'],
       '—'
     ),
     telefone: firstFilled(
+      rec?.telefone,
       f['Telefone'],
       f['Telefone do Cliente'],
       f['WhatsApp'],
-      f['Whatsapp'],
       f['Celular'],
-      f['Telefone Cliente'],
       f['cliente_telefone'],
-      f['telefone_cliente'],
       f['telefone'],
       '—'
     ),
@@ -967,7 +962,7 @@ function normalizeTroca(rec){
     linhaEstornoAutorizado: firstFilled(f['Linha Formatada – Estorno Autorizado'], ''),
     linhaEstornoConfirmado: firstFilled(f['Linha Formatada – Estorno Confirmado'], ''),
     linhaFinalizacao: firstFilled(f['Linha Formatada – Solicitação Finalizada'], ''),
-    voucherCodigo: firstFilled(f['Voucher'], f['Código Voucher'], f['Codigo Voucher'], f['codigo_voucher'], ''),
+    voucherCodigo: firstFilled(f['Voucher'], f['Código Voucher'], f['codigo_voucher'], ''),
   };
 }
 function isRefundRequest(t){
@@ -1026,15 +1021,12 @@ function buildTimelineHtml(t){
     'Finalizado': 'finalizado'
   };
   const currentStatus = canonicalStatus(t.status);
-  const finalizadoPorVoucher = currentStatus==='Finalizado' && (t.linhaVoucherEnviado || t.dataVoucherEnviado);
-  const currentKey = finalizadoPorVoucher ? 'voucher_enviado' : (statusKeyMap[currentStatus] || 'status_atual');
+  const currentKey = statusKeyMap[currentStatus] || 'status_atual';
   if(!existingKeys.has(currentKey)){
     entries.push({
       key: currentKey,
-      label: finalizadoPorVoucher ? 'Voucher Enviado' : getCurrentTimelineStatusLabel(currentStatus),
-      meta: finalizadoPorVoucher
-        ? (t.dataVoucherEnviado ? formatDate(t.dataVoucherEnviado) : 'Status atual')
-        : (currentStatus==='Finalizado' && t.dataFinalizacao ? formatDate(t.dataFinalizacao) : 'Status atual'),
+      label: getCurrentTimelineStatusLabel(currentStatus),
+      meta: currentStatus==='Finalizado' && t.dataFinalizacao ? formatDate(t.dataFinalizacao) : 'Status atual',
       state: 'current'
     });
   }
@@ -1390,9 +1382,7 @@ function abrirDetalhe(recordId){
   const prazoColor = t.trocaNoPrazo==='Sim' ? 'var(--green)' : t.trocaNoPrazo==='Não' ? 'var(--red)' : 'var(--ink)';
   const prazoText = t.trocaNoPrazo==='Sim' ? '✓ Sim' : t.trocaNoPrazo==='Não' ? '✗ Não' : t.trocaNoPrazo;
   const voucherValor = getVoucherAmount(t);
-  const voucherInfo = t.voucherCodigo
-    ? `<div class="detail-item"><label>Código do Voucher</label><div class="value" style="font-family:'DM Mono',monospace;color:var(--green);font-weight:700">${t.voucherCodigo}</div></div>`
-    : `<div class="detail-item"><label>Código do Voucher</label><div class="value">—</div></div>`;
+  const btnVoucherDetalhe=document.getElementById('btn-validar-voucher-detalhe');
   document.getElementById('modal-detalhe-grid').innerHTML=`
     <div class="detail-item"><label>Cliente</label><div class="value">${t.cliente}</div></div>
     <div class="detail-item"><label>Pedido</label><div class="value">#${t.pedido}</div></div>
@@ -1403,12 +1393,13 @@ function abrirDetalhe(recordId){
     <div class="detail-item full"><label>Peças Declaradas</label><div class="value">${t.pecasDeclaradas}</div></div>
     <div class="detail-item"><label>Valor do Voucher</label><div class="value" style="color:var(--rose);font-weight:700;font-size:18px">${formatCurrency(voucherValor)}</div></div>
     <div class="detail-item"><label>Troca no Prazo</label><div class="value" style="color:${prazoColor}">${prazoText}</div></div>
-    ${voucherInfo}
+    ${t.voucherCodigo?`<div class="detail-item full"><label>Código do Voucher</label><div class="value" style="font-family:'DM Mono',monospace;color:var(--green);font-weight:700">${t.voucherCodigo}</div></div>`:''}
     ${t.codigoLogistica?`<div class="detail-item full"><label>Código de Logística</label><div class="value" style="font-family:'DM Mono',monospace;font-size:16px;color:var(--blue);font-weight:700">${t.codigoLogistica}</div></div>`:''}
   `;
   document.getElementById('modal-detalhe-timeline').innerHTML=buildTimelineHtml(t);
   const btnLog=document.getElementById('btn-gerar-logistica-detalhe');
   btnLog.style.display=statusMatches(t.status,'Aguardando código de logística')?'flex':'none';
+  btnVoucherDetalhe.style.display=statusMatches(t.status,'Aguardando validação voucher')?'flex':'none';
   openModal('modal-detalhe');
 }
 function abrirLogisticaManualComDados(){
@@ -1466,7 +1457,7 @@ function abrirVoucher(recordId){
   document.getElementById('modal-voucher-grid').innerHTML=`
     <div class="detail-item"><label>Pedido Original</label><div class="value">#${t.pedido}</div></div>
     <div class="detail-item"><label>2ª Troca?</label><div class="value">${t.is2atroca?'Sim — apenas voucher':'Não — 1ª troca'}</div></div>
-    <div class="detail-item"><label>Valor Original</label><div class="value">${formatCurrency(voucherValor)}</div></div>
+    <div class="detail-item"><label>Valor do Voucher</label><div class="value">${formatCurrency(voucherValor)}</div></div>
     <div class="detail-item"><label>Troca no Prazo</label><div class="value" style="color:${prazoColor}">${t.trocaNoPrazo}</div></div>
     <div class="detail-item"><label>E-mail</label><div class="value">${t.email}</div></div>
     <div class="detail-item"><label>Telefone</label><div class="value">${t.telefone}</div></div>
@@ -1476,44 +1467,47 @@ function abrirVoucher(recordId){
 }
 async function validarEEnviarVoucher(){
   if(!currentRecord) return;
-  const t = normalizeTroca(currentRecord);
-  const telefone = cleanFieldValue(t.telefone);
-  const email = cleanFieldValue(t.email);
-  const codigoVoucher = cleanFieldValue(t.voucherCodigo);
-  const valorVoucher = getVoucherAmount(t);
+  const rec=currentRecord;
+  const t = normalizeTroca(rec);
+  const payload = {
+    airtable_record_id: rec.id,
+    numero_pedido: String(t.pedido || '').replace(/^#/, ''),
+    cliente: t.cliente === '—' ? '' : t.cliente,
+    telefone: t.telefone === '—' ? '' : t.telefone,
+    email: t.email === '—' ? '' : t.email,
+    valor_voucher: getVoucherAmount(t),
+    codigo_voucher: t.voucherCodigo || '',
+    protocolo: t.protocolo === '—' ? '' : t.protocolo
+  };
 
-  if(!codigoVoucher){
-    showToast('Este caso ainda não possui código de voucher preenchido no Airtable.','error');
+  if(!payload.airtable_record_id){
+    showToast('Não foi possível identificar o registro da solicitação.','error');
     return;
   }
-  if(!telefone){
-    showToast('Este caso não possui telefone preenchido para envio do voucher.','error');
+  if(!payload.telefone){
+    showToast('Telefone da cliente não encontrado nesta solicitação.','warning');
     return;
   }
-  if(!(valorVoucher > 0)){
-    showToast('Este caso não possui valor de voucher válido para envio.','error');
+  if(!payload.codigo_voucher){
+    showToast('Código do voucher não encontrado para esta solicitação.','warning');
+    return;
+  }
+  if(!(payload.valor_voucher > 0)){
+    showToast('Valor do voucher inválido para envio.','warning');
     return;
   }
 
-  closeModal('modal-voucher');
   showLoading();
   try{
-    const payload = {
-      airtable_record_id: currentRecord.id,
-      numero_pedido: cleanFieldValue(t.pedido),
-      cliente: cleanFieldValue(t.cliente),
-      telefone,
-      email,
-      valor_voucher: Number(valorVoucher),
-      codigo_voucher: codigoVoucher,
-      protocolo: cleanFieldValue(t.protocolo)
-    };
-    const response = await postJson(`${N8N_BASE}/enviar-voucher`, payload);
-    showToast(response.mensagem || 'Voucher enviado com sucesso para a cliente.','success');
-    await carregarDados();
+    const data = await postJson(`${N8N_BASE}/enviar-voucher`, payload);
+    closeModal('modal-voucher');
+    closeModal('modal-detalhe');
+    const msg = data?.mensagem || 'Voucher enviado para a cliente com sucesso.';
+    showToast(msg,'success');
+    setTimeout(()=>carregarDados(),1800);
   }catch(e){
     console.error('Erro ao enviar voucher:', e);
-    showToast(e.message || 'Erro ao enviar voucher para a cliente.','error');
+    showToast(e.message || 'Erro ao enviar o voucher para a cliente.','error');
   }finally{
     hideLoading();
   }
