@@ -378,7 +378,7 @@ select.form-control{cursor:pointer}
     </div>
     <div class="modal-foot">
       <button class="btn btn-secondary" onclick="closeModal('modal-detalhe')">Fechar</button>
-      <button class="btn btn-success" id="btn-validar-voucher-detalhe" onclick="if(currentRecord){closeModal('modal-detalhe');abrirVoucher(currentRecord.id)}" style="display:none">✓ Validar voucher</button>
+      <button class="btn btn-success" id="btn-validar-voucher-detalhe" onclick="if(currentRecord){closeModal('modal-detalhe');abrirVoucher(currentRecord.id)}" style="display:none">✓ Aprovar e Enviar Voucher</button>
       <button class="btn btn-warning" id="btn-gerar-logistica-detalhe" onclick="abrirLogisticaManualComDados()" style="display:none">📬 Gerar Código Logística</button>
     </div>
   </div>
@@ -438,12 +438,12 @@ select.form-control{cursor:pointer}
         <div style="font-size:12px;opacity:.7" id="modal-voucher-desc">—</div>
       </div>
       <div class="detail-grid" id="modal-voucher-grid"></div>
-      <div class="alert alert-warning">⚠️ Após <strong>Validar e Enviar</strong>, o voucher será enviado automaticamente pelo WhatsApp e e-mail. Esta ação não pode ser desfeita.</div>
+      <div class="alert alert-warning">⚠️ Após <strong>Aprovar e Enviar Voucher</strong>, o voucher será enviado automaticamente pelo WhatsApp e e-mail. Esta ação não pode ser desfeita.</div>
     </div>
     <div class="modal-foot">
       <button class="btn btn-secondary" onclick="closeModal('modal-voucher')">Cancelar</button>
       <button class="btn btn-ghost" onclick="closeModal('modal-voucher');enviarParaRetencao()">↗ Enviar para Gerência</button>
-      <button class="btn btn-success" onclick="validarEEnviarVoucher()">✓ Validar e Enviar</button>
+      <button class="btn btn-success" onclick="validarEEnviarVoucher()">✓ Aprovar e Enviar Voucher</button>
     </div>
   </div>
 </div>
@@ -1232,7 +1232,7 @@ function renderFalecom(){
     const status=t.status||'';
     const codLog=t.codigoLogistica||'';
     let acoes='';
-    if(statusMatches(status,'Aguardando validação voucher')) acoes=`<button class="btn btn-success btn-sm" onclick="event.stopPropagation();abrirVoucher('${r.id}')">✓ Validar voucher</button>`;
+    if(statusMatches(status,'Aguardando validação voucher')) acoes=`<button class="btn btn-success btn-sm" onclick="event.stopPropagation();abrirVoucher('${r.id}')">✓ Aprovar e Enviar Voucher</button>`;
     else if(statusMatches(status,'Aguardando código de logística')) acoes=`<button class="btn btn-warning btn-sm" onclick="event.stopPropagation();preencherLogisticaManual('${r.id}')">📬 Gerar</button>`;
     return `<tr onclick="abrirDetalhe('${r.id}')">
       <td class="td-proto">${t.protocolo}</td>
