@@ -17,7 +17,7 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'DM Sans',sans-serif;background:var(--surface-2);color:var(--ink);min-height:100vh}
 /* ===== LOGIN ===== */
-#login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,var(--ink) 0%,#2d1a24 100%);padding:20px}
+#login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,var(--ink) 0%,#2d1a24 100%);padding:20px}
 .login-card{background:white;border-radius:20px;padding:48px;width:100%;max-width:420px;box-shadow:0 32px 80px rgba(0,0,0,.35)}
 .login-logo{text-align:center;margin-bottom:32px}
 .login-logo .brand{font-size:28px;font-weight:700;color:var(--rose);letter-spacing:3px}
@@ -32,6 +32,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--surface-2);color:var(--in
 .btn-login:hover{background:var(--rose-dark)}
 .btn-login:disabled{opacity:.6;cursor:not-allowed}
 .login-error{background:var(--red-bg);color:var(--red);border:1px solid #FFCCCC;border-radius:8px;padding:10px 14px;font-size:13px;margin-top:14px;display:none}
+.login-footer{margin-top:18px;width:100%;max-width:420px;text-align:center;font-size:12px;color:rgba(255,255,255,.6);letter-spacing:.2px}.login-footer strong{color:var(--rose-light);font-weight:600}
 /* ===== APP ===== */
 #app{display:none}
 .sidebar{position:fixed;left:0;top:0;bottom:0;width:240px;background:var(--ink);display:flex;flex-direction:column;z-index:100}
@@ -207,6 +208,7 @@ select.form-control{cursor:pointer}
     <button class="btn-login" id="btn-entrar" onclick="fazerLogin()">Entrar</button>
     <div class="login-error" id="login-error">E-mail ou senha incorretos. Verifique e tente novamente.</div>
   </div>
+  <div class="login-footer">Desenvolvido por <strong>Marcus Dutra</strong> · Versão 3.1.1</div>
 </div>
 <!-- ===== APP ===== -->
 <div id="app">
@@ -252,9 +254,9 @@ select.form-control{cursor:pointer}
           <button class="filter-btn" onclick="setFilter(this,'Aguardando cliente')">Aguardando Cliente</button>
           <button class="filter-btn" onclick="setFilter(this,'Peça recebida')">Peça Recebida</button>
           <button class="filter-btn" onclick="setFilter(this,'Aguardando validação voucher')">Validação Voucher</button>
-          <button class="filter-btn" onclick="setFilter(this,'Em retenção')">Em Retenção</button>
-          <button class="filter-btn" onclick="setFilter(this,'Aguardando estorno')">Aguardando Estorno</button>
-          <button class="filter-btn" onclick="setFilter(this,'Finalizado')">Finalizado</button>
+          <button class="filter-btn" onclick="setFilter(this,'Em Retenção pela Gerência')">Em Retenção</button>
+          <button class="filter-btn" onclick="setFilter(this,'Aguardando Estorno')">Aguardando Estorno</button>
+          <button class="filter-btn" onclick="setFilter(this,'Solicitação Finalizada')">Finalizado</button>
         </div>
         <div class="table-card">
           <div class="table-header">
@@ -308,13 +310,13 @@ select.form-control{cursor:pointer}
       <!-- FINANCEIRO -->
       <div class="page" id="page-financeiro">
         <div class="stats-row" style="grid-template-columns:repeat(3,1fr)">
-          <div class="stat-card red"><div class="stat-label">Aguardando Estorno</div><div class="stat-value" id="stat-fin-estorno">—</div><div class="stat-sub">para processar</div></div>
+          <div class="stat-card red"><div class="stat-label">Fila Financeiro</div><div class="stat-value" id="stat-fin-estorno">—</div><div class="stat-sub">autorizar, processar e finalizar</div></div>
           <div class="stat-card amber"><div class="stat-label">Valor Total Pendente</div><div class="stat-value" id="stat-fin-valor" style="font-size:22px">—</div><div class="stat-sub">a processar</div></div>
           <div class="stat-card green"><div class="stat-label">Estornados Hoje</div><div class="stat-value" id="stat-fin-hoje">—</div><div class="stat-sub">processados</div></div>
         </div>
-        <div id="alert-financeiro" class="alert alert-danger" style="display:none">🔴 <strong id="txt-alert-financeiro">Estornos autorizados aguardando processamento no Pagar.me.</strong></div>
+        <div id="alert-financeiro" class="alert alert-danger" style="display:none">🔴 <strong id="txt-alert-financeiro">Casos financeiros aguardando ação no estorno.</strong></div>
         <div class="table-card">
-          <div class="table-header"><h3>Estornos Pendentes <span class="count" id="count-financeiro"></span></h3></div>
+          <div class="table-header"><h3>Fila de Estorno <span class="count" id="count-financeiro"></span></h3></div>
           <table>
             <thead><tr><th>Protocolo</th><th>Cliente</th><th>Pedido</th><th>Valor Estorno</th><th>Autorizado por</th><th>Ações</th></tr></thead>
             <tbody id="tabela-financeiro"></tbody>
@@ -327,7 +329,7 @@ select.form-control{cursor:pointer}
           <div class="stat-card purple"><div class="stat-label">Em Retenção</div><div class="stat-value" id="stat-ger-retencao">—</div><div class="stat-sub">aguarda decisão</div></div>
           <div class="stat-card"><div class="stat-label">Total do Mês</div><div class="stat-value" id="stat-ger-mes">—</div><div class="stat-sub">trocas abertas</div></div>
           <div class="stat-card green"><div class="stat-label">Finalizados</div><div class="stat-value" id="stat-ger-fin">—</div><div class="stat-sub">concluídos</div></div>
-          <div class="stat-card amber"><div class="stat-label">Aguardando Estorno</div><div class="stat-value" id="stat-ger-estorno">—</div><div class="stat-sub">para financeiro</div></div>
+          <div class="stat-card amber"><div class="stat-label">Fila de Estorno</div><div class="stat-value" id="stat-ger-estorno">—</div><div class="stat-sub">aguarda financeiro</div></div>
         </div>
         <div id="alert-gerencia" class="alert alert-warning" style="display:none">⚠️ <strong id="txt-alert-gerencia">Casos em retenção aguardam sua decisão.</strong></div>
         <div class="table-card">
@@ -465,7 +467,7 @@ select.form-control{cursor:pointer}
     <div class="modal-foot">
       <button class="btn btn-secondary" onclick="closeModal('modal-retencao')">Fechar</button>
       <button class="btn btn-success" id="btn-autorizar-voucher" onclick="autorizarVoucher()">✓ Autorizar Voucher</button>
-      <button class="btn btn-danger" id="btn-autorizar-estorno" onclick="autorizarEstorno()">💳 Autorizar Estorno</button>
+      <button class="btn btn-danger" id="btn-autorizar-estorno" onclick="autorizarEstorno()">💳 Enviar para Estorno</button>
     </div>
   </div>
 </div>
@@ -477,13 +479,13 @@ select.form-control{cursor:pointer}
       <button class="modal-close" onclick="closeModal('modal-estorno')">✕</button>
     </div>
     <div class="modal-body">
-      <div class="alert alert-info" id="modal-est-info">ℹ️ Estorno autorizado. Processe no Pagar.me e registre o comprovante.</div>
+      <div class="alert alert-info" id="modal-est-info">ℹ️ Acompanhe a etapa financeira do estorno, registrando autorização, processamento e finalização.</div>
       <div class="detail-grid" id="modal-est-grid"></div>
-      <div class="form-group">
+      <div class="form-group" id="group-est-comprovante">
         <label>Número do Comprovante / NSU</label>
         <input type="text" class="form-control" id="modal-est-comprovante" placeholder="Cole aqui o número do comprovante do Pagar.me">
       </div>
-      <div class="form-group">
+      <div class="form-group" id="group-est-anexo">
         <label>Anexar Comprovante</label>
         <div class="file-upload-area" onclick="document.getElementById('file-comprovante').click()">
           <input type="file" id="file-comprovante" accept=".pdf,.jpg,.jpeg,.png" onchange="previewFile(this)">
@@ -491,14 +493,14 @@ select.form-control{cursor:pointer}
         </div>
         <div class="file-preview" id="file-preview-est">—</div>
       </div>
-      <div class="form-group">
+      <div class="form-group" id="group-est-obs">
         <label>Observação</label>
         <textarea class="form-control" id="modal-est-obs" placeholder="Informações adicionais..."></textarea>
       </div>
     </div>
     <div class="modal-foot">
       <button class="btn btn-secondary" onclick="closeModal('modal-estorno')">Cancelar</button>
-      <button class="btn btn-danger" onclick="confirmarEstorno()">💳 Confirmar Estorno</button>
+      <button class="btn btn-danger" id="btn-confirmar-estorno" onclick="confirmarEstorno()">💳 Confirmar Estorno</button>
     </div>
   </div>
 </div>
@@ -785,11 +787,11 @@ function canonicalStatus(status=''){
   if(s==='aguardando voucher') return 'Aguardando voucher';
   if(s==='aguardando validacao voucher') return 'Aguardando validação voucher';
   if(s==='voucher gerado') return 'Voucher gerado';
-  if(s==='em retencao') return 'Em retenção';
-  if(s==='aguardando estorno') return 'Aguardando estorno';
-  if(s==='estorno autorizado') return 'Estorno autorizado';
+  if(s==='em retencao' || s==='em retencao pela gerencia') return 'Em Retenção pela Gerência';
+  if(s==='aguardando estorno') return 'Aguardando Estorno';
+  if(s==='estorno autorizado') return 'Estorno Autorizado';
   if(s==='estorno realizado') return 'Estorno Realizado';
-  if(s==='finalizado') return 'Finalizado';
+  if(s==='finalizado' || s==='solicitacao finalizada') return 'Solicitação Finalizada';
   return status || 'Novo';
 }
 function statusMatches(status, ...targets){
@@ -805,11 +807,11 @@ function badgeStatus(status){
     'Aguardando voucher':'badge-voucher',
     'Aguardando validação voucher':'badge-voucher',
     'Voucher gerado':'badge-voucher',
-    'Em retenção':'badge-retention',
-    'Aguardando estorno':'badge-refund',
-    'Estorno autorizado':'badge-refund',
+    'Em Retenção pela Gerência':'badge-retention',
+    'Aguardando Estorno':'badge-refund',
+    'Estorno Autorizado':'badge-refund',
     'Estorno Realizado':'badge-done',
-    'Finalizado':'badge-done',
+    'Solicitação Finalizada':'badge-done',
   };
   return map[canonicalStatus(status)]||'badge-new';
 }
@@ -867,11 +869,11 @@ function getCurrentTimelineStatusLabel(status=''){
   if(s==='Aguardando voucher') return 'Aguardando voucher';
   if(s==='Aguardando validação voucher') return 'Aguardando validação voucher';
   if(s==='Voucher gerado') return 'Voucher gerado';
-  if(s==='Em retenção') return 'Em retenção';
-  if(s==='Aguardando estorno') return 'Aguardando estorno';
-  if(s==='Estorno autorizado') return 'Estorno autorizado';
+  if(s==='Em Retenção pela Gerência') return 'Em retenção pela gerência';
+  if(s==='Aguardando Estorno') return 'Aguardando estorno';
+  if(s==='Estorno Autorizado') return 'Estorno autorizado';
   if(s==='Estorno Realizado') return 'Estorno realizado';
-  if(s==='Finalizado') return 'Finalizado';
+  if(s==='Solicitação Finalizada') return 'Solicitação finalizada';
   return s || 'Status atual';
 }
 function normalizeTroca(rec){
@@ -948,7 +950,10 @@ function normalizeTroca(rec){
     dataAguardandoEstorno: firstFilled(f['Data Aguardando Estorno'], ''),
     dataEstornoAutorizado: firstFilled(f['Data Estorno Autorizado'], ''),
     dataEstorno: firstFilled(f['Data Estorno Confirmado'], f['Data Estorno'], f['Data de Estorno'], f['Data Estorno Realizado'], ''),
-    dataFinalizacao: firstFilled(f['Data Finalização'], f['Data de Finalização'], ''),
+    dataEnvioComprovante: firstFilled(f['Data Envio Comprovante'], ''),
+    dataFinalizacao: firstFilled(f['Data Finalização Novo'], f['Data Finalização'], f['Data de Finalização'], ''),
+    dataLogisticaAnterior: firstFilled(f['Data da Logística Anterior'], ''),
+    dataReemissaoLogistica: firstFilled(f['Data Reemissão de Logística'], ''),
     linhaSolicitacao: firstFilled(f['Linha Formatada – Cliente solicitou logística'], ''),
     linhaLogistica: firstFilled(f['Linha Formatada – Logística Reversa Gerada'], ''),
     linhaAguardandoCliente: firstFilled(f['Linha Formatada – Aguardando Cliente'], ''),
@@ -961,8 +966,25 @@ function normalizeTroca(rec){
     linhaAguardandoEstorno: firstFilled(f['Linha Formatada – Aguardando Estorno'], ''),
     linhaEstornoAutorizado: firstFilled(f['Linha Formatada – Estorno Autorizado'], ''),
     linhaEstornoConfirmado: firstFilled(f['Linha Formatada – Estorno Confirmado'], ''),
+    linhaComprovanteEnviado: firstFilled(f['Linha Formatada – Comprovante do Estorno Enviado'], ''),
+    linhaReemissaoLogistica: firstFilled(f['Linha Formatada – Reemissão de Logística'], ''),
     linhaFinalizacao: firstFilled(f['Linha Formatada – Solicitação Finalizada'], ''),
     voucherCodigo: firstFilled(f['Voucher'], f['Código Voucher'], f['codigo_voucher'], ''),
+    tentativaLogistica: Number(firstFilled(f['Tentativa de Logística'], 0) || 0),
+    reemissaoLogistica: firstFilled(f['Reemissão de Logística'], ''),
+    reemissaoAutorizada: firstFilled(f['Reemissão Autorizada'], ''),
+    motivoReemissaoLogistica: firstFilled(f['Motivo Reemissão Logística'], ''),
+    codigoLogisticaAnterior: firstFilled(f['Código de Logística Anterior'], ''),
+    validadeLogisticaAtual: firstFilled(f['Validade Logística Atual'], ''),
+    idPrepostagemAtual: firstFilled(f['ID Prepostagem Atual'], ''),
+    urlRastreioAtual: firstFilled(f['URL Rastreio Atual'], ''),
+    historicoLogisticas: firstFilled(f['Histórico de Logísticas'], ''),
+    resultadoRetencao: firstFilled(f['Resultado da Retenção'], ''),
+    motivoEstornoDetalhe: firstFilled(f['Motivo do Estorno'], ''),
+    idTransacaoPagarme: firstFilled(f['ID Transação Pagar.me'], ''),
+    comprovanteEstorno: firstFilled(f['Comprovante do Estorno'], ''),
+    responsavelAutorizacaoEstorno: firstFilled(f['Responsável Autorização Estorno'], ''),
+    observacaoEstorno: firstFilled(f['Observação do Estorno'], ''),
   };
 }
 function isRefundRequest(t){
@@ -1026,7 +1048,7 @@ function buildTimelineHtml(t){
     entries.push({
       key: currentKey,
       label: getCurrentTimelineStatusLabel(currentStatus),
-      meta: currentStatus==='Finalizado' && t.dataFinalizacao ? formatDate(t.dataFinalizacao) : 'Status atual',
+      meta: currentStatus==='Solicitação Finalizada' && t.dataFinalizacao ? formatDate(t.dataFinalizacao) : 'Status atual',
       state: 'current'
     });
   }
@@ -1185,11 +1207,11 @@ function renderGeral(){
   allTrocas.forEach(r=>{
     const t = normalizeTroca(r);
     const s=t.status||'';
-    if(!statusMatches(s,'Finalizado')) total++;
-    if(statusMatches(s,'Aguardando código de logística','Peça recebida','Aguardando voucher','Aguardando validação voucher','Aguardando estorno')) acao++;
-    if(statusMatches(s,'Finalizado') && new Date(t.dataAbertura||t.createdTime).toDateString()===hoje) finHoje++;
+    if(!statusMatches(s,'Solicitação Finalizada')) total++;
+    if(statusMatches(s,'Aguardando código de logística','Peça recebida','Aguardando voucher','Aguardando validação voucher','Aguardando Estorno','Estorno Autorizado','Estorno Realizado')) acao++;
+    if(statusMatches(s,'Solicitação Finalizada') && new Date(t.dataAbertura||t.createdTime).toDateString()===hoje) finHoje++;
     if(statusMatches(s,'Aguardando cliente')) transito++;
-    if(statusMatches(s,'Em retenção')) retencao++;
+    if(statusMatches(s,'Em Retenção pela Gerência')) retencao++;
   });
   document.getElementById('stat-total').textContent=total;
   document.getElementById('stat-acao').textContent=acao;
@@ -1217,7 +1239,7 @@ function renderFalecom(){
   const fila=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Aguardando código de logística','Aguardando validação voucher'));
   const vouchers=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Aguardando validação voucher')).length;
   const semLog=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Aguardando código de logística')).length;
-  const ret=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Em retenção')).length;
+  const ret=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Em Retenção pela Gerência')).length;
   document.getElementById('stat-falecom-voucher').textContent=vouchers;
   document.getElementById('stat-falecom-logistica').textContent=semLog;
   document.getElementById('stat-falecom-retencao').textContent=ret;
@@ -1271,36 +1293,54 @@ function renderLogistica(){
   }).join('');
 }
 // ===== RENDER FINANCEIRO =====
+function getFinanceActionMeta(status=''){
+  const s=canonicalStatus(status);
+  if(s==='Aguardando Estorno') return {label:'✓ Autorizar Estorno', hint:'Fila financeira — registrar autorização do estorno'};
+  if(s==='Estorno Autorizado') return {label:'💳 Processar Estorno', hint:'Autorizado — falta processar no Pagar.me'};
+  if(s==='Estorno Realizado') return {label:'✅ Finalizar Solicitação', hint:'Estorno realizado — falta encerrar o caso'};
+  return {label:'Ver', hint:'Acompanhar caso'};
+}
 function renderFinanceiro(){
-  const estornos=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Aguardando estorno','Estorno autorizado'));
-  const valor=estornos.reduce((s,r)=>s+(normalizeTroca(r).valorEstornoNumero || normalizeTroca(r).valorVoucherNumero || 0),0);
+  const estornos=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Aguardando Estorno','Estorno Autorizado','Estorno Realizado'));
+  const pendentes=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Aguardando Estorno','Estorno Autorizado')).length;
+  const valor=estornos.reduce((s,r)=>{const t=normalizeTroca(r);return s+(t.valorEstornoNumero||t.valorVoucherNumero||t.valorTrocaNumero||0)},0);
+  const hojeToken=new Date().toDateString();
+  const feitosHoje=allTrocas.filter(r=>{
+    const t=normalizeTroca(r);
+    if(!statusMatches(t.status,'Estorno Realizado','Solicitação Finalizada')) return false;
+    const data=t.dataEstorno||t.dataEnvioComprovante||t.dataFinalizacao;
+    return data && new Date(data).toDateString()===hojeToken;
+  }).length;
   document.getElementById('stat-fin-estorno').textContent=estornos.length;
-  document.getElementById('stat-fin-valor').textContent=valor>0?'R$'+valor.toFixed(0):'—';
-  document.getElementById('stat-fin-hoje').textContent=0;
-  document.getElementById('count-financeiro').textContent=estornos.length+' casos';
+  document.getElementById('stat-fin-valor').textContent=formatCurrency(valor);
+  document.getElementById('stat-fin-hoje').textContent=feitosHoje;
+  document.getElementById('count-financeiro').textContent=estornos.length+' caso'+(estornos.length!==1?'s':'');
   const alertEl=document.getElementById('alert-financeiro');
-  if(estornos.length>0){alertEl.style.display='flex';document.getElementById('txt-alert-financeiro').textContent=estornos.length+' estorno'+(estornos.length>1?'s':'')+' autorizado'+(estornos.length>1?'s':'')+' aguardando processamento no Pagar.me.';}
-  else alertEl.style.display='none';
+  if(estornos.length>0){
+    alertEl.style.display='flex';
+    document.getElementById('txt-alert-financeiro').textContent=`${estornos.length} caso${estornos.length>1?'s':''} na fila financeira, sendo ${pendentes} aguardando autorização ou processamento.`;
+  } else alertEl.style.display='none';
   const tbody=document.getElementById('tabela-financeiro');
-  if(!estornos.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--ink-muted)">Nenhum estorno pendente 🎉</td></tr>';return}
+  if(!estornos.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--ink-muted)">Nenhum caso financeiro pendente 🎉</td></tr>';return}
   tbody.innerHTML=estornos.map(r=>{
     const t = normalizeTroca(r);
+    const meta=getFinanceActionMeta(t.status);
     return `<tr onclick="abrirEstorno('${r.id}')">
       <td class="td-proto">${t.protocolo}</td>
       <td class="td-cliente">${t.cliente}</td>
       <td>#${t.pedido}</td>
-      <td><strong style="color:var(--red)">${formatCurrency(t.valorEstornoNumero || t.valorVoucherNumero || t.valorVoucher)}</strong></td>
-      <td style="font-size:12px;color:var(--ink-muted)">Gerência</td>
-      <td><button class="btn btn-primary btn-sm" onclick="event.stopPropagation();abrirEstorno('${r.id}')">💳 Processar</button></td>
+      <td><strong style="color:var(--red)">${formatCurrency(t.valorEstornoNumero || t.valorVoucherNumero || t.valorTrocaNumero || t.valorVoucher)}</strong></td>
+      <td style="font-size:12px;color:var(--ink-muted)">${t.responsavelAutorizacaoEstorno || 'Gerência / Financeiro'}</td>
+      <td><button class="btn btn-primary btn-sm" onclick="event.stopPropagation();abrirEstorno('${r.id}')">${meta.label}</button></td>
     </tr>`;
   }).join('');
 }
 // ===== RENDER GERÊNCIA =====
 function renderGerencia(){
-  const retencao=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Em retenção'));
+  const retencao=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Em Retenção pela Gerência'));
   const total=allTrocas.length;
-  const fin=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Finalizado')).length;
-  const estorno=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Aguardando estorno','Estorno autorizado')).length;
+  const fin=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Solicitação Finalizada')).length;
+  const estorno=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Aguardando Estorno','Estorno Autorizado','Estorno Realizado')).length;
   document.getElementById('stat-ger-retencao').textContent=retencao.length;
   document.getElementById('stat-ger-mes').textContent=total;
   document.getElementById('stat-ger-fin').textContent=fin;
@@ -1357,10 +1397,10 @@ function renderCarrinhos(){
 // ===== BADGES =====
 function atualizarBadges(){
   const counts={
-    falecom: allTrocas.filter(r=>['Aguardando código de logística','Aguardando validação voucher','Em retenção'].includes(normalizeTroca(r).status||'')).length,
+    falecom: allTrocas.filter(r=>['Aguardando código de logística','Aguardando validação voucher','Em Retenção pela Gerência'].includes(normalizeTroca(r).status||'')).length,
     logistica: allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Peça recebida')).length,
-    financeiro: allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Aguardando estorno','Estorno autorizado')).length,
-    gerencia: allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Em retenção')).length,
+    financeiro: allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Aguardando Estorno','Estorno Autorizado','Estorno Realizado')).length,
+    gerencia: allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Em Retenção pela Gerência')).length,
     geral: allTrocas.filter(r=>!statusMatches(normalizeTroca(r).status,'Finalizado')).length,
   };
   Object.entries(counts).forEach(([id,n])=>{
@@ -1394,7 +1434,15 @@ function abrirDetalhe(recordId){
     <div class="detail-item"><label>Valor do Voucher</label><div class="value" style="color:var(--rose);font-weight:700;font-size:18px">${formatCurrency(voucherValor)}</div></div>
     <div class="detail-item"><label>Troca no Prazo</label><div class="value" style="color:${prazoColor}">${prazoText}</div></div>
     ${t.voucherCodigo?`<div class="detail-item full"><label>Código do Voucher</label><div class="value" style="font-family:'DM Mono',monospace;color:var(--green);font-weight:700">${t.voucherCodigo}</div></div>`:''}
-    ${t.codigoLogistica?`<div class="detail-item full"><label>Código de Logística</label><div class="value" style="font-family:'DM Mono',monospace;font-size:16px;color:var(--blue);font-weight:700">${t.codigoLogistica}</div></div>`:''}
+    ${t.codigoLogistica?`<div class="detail-item full"><label>Código de Logística Atual</label><div class="value" style="font-family:'DM Mono',monospace;font-size:16px;color:var(--blue);font-weight:700">${t.codigoLogistica}</div></div>`:''}
+    ${t.codigoLogisticaAnterior?`<div class="detail-item full"><label>Código de Logística Anterior</label><div class="value" style="font-family:'DM Mono',monospace;color:var(--ink-soft);font-weight:700">${t.codigoLogisticaAnterior}</div></div>`:''}
+    ${t.tentativaLogistica?`<div class="detail-item"><label>Tentativa de Logística</label><div class="value">${t.tentativaLogistica}</div></div>`:''}
+    ${t.reemissaoLogistica?`<div class="detail-item"><label>Reemissão de Logística</label><div class="value">${t.reemissaoLogistica}</div></div>`:''}
+    ${t.motivoReemissaoLogistica?`<div class="detail-item full"><label>Motivo Reemissão Logística</label><div class="value">${t.motivoReemissaoLogistica}</div></div>`:''}
+    ${t.resultadoRetencao?`<div class="detail-item"><label>Resultado da Retenção</label><div class="value">${t.resultadoRetencao}</div></div>`:''}
+    ${t.idTransacaoPagarme?`<div class="detail-item"><label>ID Transação Pagar.me</label><div class="value" style="font-family:'DM Mono',monospace">${t.idTransacaoPagarme}</div></div>`:''}
+    ${t.dataEnvioComprovante?`<div class="detail-item"><label>Comprovante Enviado</label><div class="value">${formatDate(t.dataEnvioComprovante)}</div></div>`:''}
+    ${t.observacaoEstorno?`<div class="detail-item full"><label>Observação do Estorno</label><div class="value">${t.observacaoEstorno}</div></div>`:''}
   `;
   document.getElementById('modal-detalhe-timeline').innerHTML=buildTimelineHtml(t);
   const btnLog=document.getElementById('btn-gerar-logistica-detalhe');
@@ -1586,10 +1634,13 @@ async function autorizarEstorno(){
   showLoading();
   try{
     await updateAirtable(BASE_TROCAS, TABLE_TROCAS, currentRecord.id, {
-      'Status Atual':'Aguardando estorno'
+      'Status Atual':'Aguardando Estorno',
+      'Resultado da Retenção':'Seguiu para estorno',
+      'Motivo do Estorno': normalizeTroca(currentRecord).motivo || '',
+      'Observação do Estorno': document.getElementById('modal-ret-obs').value.trim() || ''
     });
     closeModal('modal-retencao');
-    showToast('Estorno autorizado! Caso enviado para o financeiro.','success');
+    showToast('Caso enviado para o financeiro para seguir com o estorno.','success');
     setTimeout(()=>carregarDados(),1500);
   }catch(e){
     console.error('Erro ao autorizar estorno:', e);
@@ -1636,7 +1687,7 @@ async function confirmarRecebimento(){
   const codigosConferidos = selectedItems.map(item => item.querySelector('.item-code')?.textContent?.trim()).filter(Boolean);
   const observacao=document.getElementById('modal-conf-obs').value.trim();
   const fluxoEstorno = isRefundRequest(t);
-  const proximoStatus = fluxoEstorno ? 'Em retenção' : 'Aguardando voucher';
+  const proximoStatus = fluxoEstorno ? 'Em Retenção pela Gerência' : 'Aguardando voucher';
   const fields = {
     'Status Atual': proximoStatus,
     'Peças Recebidas': pecasRecebidas.join('\n'),
@@ -1700,34 +1751,89 @@ function abrirEstorno(recordId){
   currentRecord=rec;
   const t = normalizeTroca(rec);
   document.getElementById('modal-est-proto').textContent=`${t.protocolo} · ${t.cliente}`;
-  document.getElementById('modal-est-info').textContent=`ℹ️ Estorno autorizado pela Gerência. Processe no Pagar.me e registre o comprovante.`;
+  const status=t.status;
+  const infoEl=document.getElementById('modal-est-info');
+  const btnEl=document.getElementById('btn-confirmar-estorno');
+  const groupComprovante=document.getElementById('group-est-comprovante');
+  const groupAnexo=document.getElementById('group-est-anexo');
+  const groupObs=document.getElementById('group-est-obs');
+  if(statusMatches(status,'Aguardando Estorno')){
+    infoEl.textContent='ℹ️ Caso na fila do financeiro. Confirme para registrar a autorização do estorno.';
+    btnEl.textContent='✓ Autorizar Estorno';
+    groupComprovante.style.display='none';
+    groupAnexo.style.display='none';
+  }else if(statusMatches(status,'Estorno Autorizado')){
+    infoEl.textContent='ℹ️ Estorno autorizado. Processe no Pagar.me e registre o comprovante.';
+    btnEl.textContent='💳 Processar Estorno';
+    groupComprovante.style.display='block';
+    groupAnexo.style.display='block';
+  }else{
+    infoEl.textContent='ℹ️ Estorno realizado. Após envio do comprovante, finalize a solicitação.';
+    btnEl.textContent='✅ Finalizar Solicitação';
+    groupComprovante.style.display='none';
+    groupAnexo.style.display='none';
+  }
+  groupObs.style.display='block';
   document.getElementById('modal-est-grid').innerHTML=`
-    <div class="detail-item"><label>Valor do Estorno</label><div class="value" style="color:var(--red);font-weight:700;font-size:20px">${formatCurrency(t.valorEstornoNumero || t.valorVoucherNumero || t.valorVoucher)}</div></div>
+    <div class="detail-item"><label>Status Atual</label><div class="value">${status}</div></div>
+    <div class="detail-item"><label>Valor do Estorno</label><div class="value" style="color:var(--red);font-weight:700;font-size:20px">${formatCurrency(t.valorEstornoNumero || t.valorVoucherNumero || t.valorTrocaNumero || t.valorVoucher)}</div></div>
     <div class="detail-item"><label>Pedido</label><div class="value">#${t.pedido}</div></div>
     <div class="detail-item"><label>Cliente</label><div class="value">${t.cliente}</div></div>
     <div class="detail-item"><label>E-mail</label><div class="value">${t.email}</div></div>
+    <div class="detail-item"><label>Responsável Autorização</label><div class="value">${t.responsavelAutorizacaoEstorno || '—'}</div></div>
+    ${t.idTransacaoPagarme?`<div class="detail-item full"><label>ID Transação Pagar.me</label><div class="value" style="font-family:'DM Mono',monospace">${t.idTransacaoPagarme}</div></div>`:''}
   `;
-  document.getElementById('modal-est-comprovante').value='';
-  document.getElementById('modal-est-obs').value='';
+  document.getElementById('modal-est-comprovante').value=t.idTransacaoPagarme||'';
+  document.getElementById('modal-est-obs').value=t.observacaoEstorno||'';
   document.getElementById('file-preview-est').style.display='none';
   openModal('modal-estorno');
 }
 async function confirmarEstorno(){
   if(!currentRecord) return;
+  const t = normalizeTroca(currentRecord);
+  const status=t.status;
   const comprovante=document.getElementById('modal-est-comprovante').value.trim();
-  if(!comprovante){showToast('Informe o número do comprovante','warning');return}
+  const observacao=document.getElementById('modal-est-obs').value.trim();
   showLoading();
   try{
+    if(statusMatches(status,'Aguardando Estorno')){
+      await updateAirtable(BASE_TROCAS, TABLE_TROCAS, currentRecord.id, {
+        'Status Atual':'Estorno Autorizado',
+        'Data Estorno Autorizado': new Date().toISOString(),
+        'Responsável Autorização Estorno': currentUser?.nome || t.responsavelAutorizacaoEstorno || 'Financeiro',
+        'Motivo do Estorno': t.motivoEstornoDetalhe || t.motivo || '',
+        'Observação do Estorno': observacao || t.observacaoEstorno || ''
+      });
+      closeModal('modal-estorno');
+      showToast('Estorno autorizado pelo financeiro.','success');
+      setTimeout(()=>carregarDados(),1500);
+      return;
+    }
+    if(statusMatches(status,'Estorno Autorizado')){
+      if(!comprovante){showToast('Informe o número do comprovante / NSU','warning');return}
+      await updateAirtable(BASE_TROCAS, TABLE_TROCAS, currentRecord.id, {
+        'Status Atual':'Estorno Realizado',
+        'Data Estorno Confirmado': new Date().toISOString(),
+        'ID Transação Pagar.me': comprovante,
+        'Observação do Estorno': observacao || t.observacaoEstorno || '',
+        'Data Envio Comprovante': new Date().toISOString()
+      });
+      closeModal('modal-estorno');
+      showToast('Estorno realizado com sucesso.','success');
+      setTimeout(()=>carregarDados(),1500);
+      return;
+    }
     await updateAirtable(BASE_TROCAS, TABLE_TROCAS, currentRecord.id, {
-      'Status Atual':'Estorno Realizado',
-      'Data Estorno Confirmado': new Date().toISOString()
+      'Status Atual':'Solicitação Finalizada',
+      'Data Envio Comprovante': t.dataEnvioComprovante || new Date().toISOString(),
+      'Observação do Estorno': observacao || t.observacaoEstorno || ''
     });
     closeModal('modal-estorno');
-    showToast('Estorno confirmado com sucesso.','success');
+    showToast('Solicitação finalizada com sucesso.','success');
     setTimeout(()=>carregarDados(),1500);
   }catch(e){
-    console.error('Erro ao confirmar estorno:', e);
-    showToast('Erro ao confirmar estorno','error');
+    console.error('Erro ao processar estorno:', e);
+    showToast('Erro ao processar estorno','error');
   }finally{
     hideLoading();
   }
