@@ -208,7 +208,7 @@ select.form-control{cursor:pointer}
     <button class="btn-login" id="btn-entrar" onclick="fazerLogin()">Entrar</button>
     <div class="login-error" id="login-error">E-mail ou senha incorretos. Verifique e tente novamente.</div>
   </div>
-  <div class="login-footer">Desenvolvido por <strong>Marcus Dutra</strong> · Versão 3.1.1</div>
+  <div class="login-footer">Desenvolvido por <strong>Marcus Dutra</strong> · Versão 3.1.2</div>
 </div>
 <!-- ===== APP ===== -->
 <div id="app">
@@ -1874,7 +1874,13 @@ async function lancarTrocaManual(){
       is2atroca: !!novaTrocaContext.pedido.is2atroca,
       produtos: produtosSelecionados
     };
-    await postJson(`${N8N_BASE}/abre-troca`, payload);
+    const aberturaResp=extractWorkflowPayload(await postJson(`${N8N_BASE}/abre-troca`, payload));
+    if(aberturaResp?.sucesso===false || aberturaResp?.bloquear_abertura){
+      const mensagemBloqueio=aberturaResp?.motivo || aberturaResp?.mensagem || 'A troca não pôde ser aberta.';
+      showNovaTrocaRegra(mensagemBloqueio,'error');
+      showToast(mensagemBloqueio,'error');
+      return;
+    }
     const prontoMessageBox=document.getElementById('nova-regra-msg');
     if(prontoMessageBox){
       prontoMessageBox.style.display='block';
