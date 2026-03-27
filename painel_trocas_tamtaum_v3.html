@@ -1012,7 +1012,7 @@ function buildTimelineHtml(t){
       existingKeys.add(key);
     }
   };
-  pushLine('solicitacao', t.linhaSolicitacao, 'Cliente solicitou logística', t.dataAbertura);
+  pushLine('solicitacao', t.linhaSolicitacao, 'Solicitação aberta', t.dataAbertura);
 
   // Só mostra eventos de logística quando a linha formatada existir de fato no Airtable
   pushLine('emissao', t.linhaLogistica, 'Logística Reversa Gerada', '');
@@ -1032,7 +1032,7 @@ function buildTimelineHtml(t){
   }
 
   const statusKeyMap = {
-    'Aguardando código de logística': 'solicitacao',
+    'Aguardando código de logística': 'aguardando_codigo_logistica',
     'Emissão da Logística Reversa': 'emissao',
     'Aguardando cliente': 'aguardando_cliente',
     'Peça recebida': 'peca_recebida',
