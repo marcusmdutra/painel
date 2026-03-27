@@ -208,7 +208,7 @@ select.form-control{cursor:pointer}
     <button class="btn-login" id="btn-entrar" onclick="fazerLogin()">Entrar</button>
     <div class="login-error" id="login-error">E-mail ou senha incorretos. Verifique e tente novamente.</div>
   </div>
-  <div class="login-footer">Desenvolvido por <strong>Marcus Dutra</strong> · Versão 3.1.2</div>
+  <div class="login-footer">Desenvolvido por <strong>Marcus Dutra</strong> · Versão 3.1.3</div>
 </div>
 <!-- ===== APP ===== -->
 <div id="app">
@@ -1013,8 +1013,11 @@ function buildTimelineHtml(t){
     }
   };
   pushLine('solicitacao', t.linhaSolicitacao, 'Cliente solicitou logística', t.dataAbertura);
-  pushLine('emissao', t.linhaLogistica, 'Logística Reversa Gerada', t.dataEmissao);
-  pushLine('aguardando_cliente', t.linhaAguardandoCliente, 'Aguardando retorno do cliente', t.dataAguardandoCliente);
+
+  // Só mostra eventos de logística quando a linha formatada existir de fato no Airtable
+  pushLine('emissao', t.linhaLogistica, 'Logística Reversa Gerada', '');
+  pushLine('aguardando_cliente', t.linhaAguardandoCliente, 'Aguardando retorno do cliente', '');
+
   pushLine('peca_recebida', t.linhaPecaRecebida, 'Peça Recebida', t.dataRecebimento);
   pushLine('voucher_gerado', t.linhaVoucher, 'Voucher Gerado', t.dataVoucher);
   pushLine('aguardando_validacao_voucher', t.linhaAguardandoValidacaoVoucher, 'Aguardando Validação Voucher', t.dataEntradaValidacaoVoucher);
@@ -1874,13 +1877,19 @@ async function lancarTrocaManual(){
       is2atroca: !!novaTrocaContext.pedido.is2atroca,
       produtos: produtosSelecionados
     };
-    const aberturaResp=extractWorkflowPayload(await postJson(`${N8N_BASE}/abre-troca`, payload));
-    if(aberturaResp?.sucesso===false || aberturaResp?.bloquear_abertura){
-      const mensagemBloqueio=aberturaResp?.motivo || aberturaResp?.mensagem || 'A troca não pôde ser aberta.';
-      showNovaTrocaRegra(mensagemBloqueio,'error');
-      showToast(mensagemBloqueio,'error');
+    const aberturaResp = extractWorkflowPayload(await postJson(`${N8N_BASE}/abre-troca`, payload));
+
+    if (aberturaResp?.sucesso === false || aberturaResp?.bloquear_abertura) {
+      const mensagemBloqueio =
+        aberturaResp?.motivo ||
+        aberturaResp?.mensagem ||
+        'A troca não pôde ser aberta.';
+
+      showNovaTrocaRegra(mensagemBloqueio, 'error');
+      showToast(mensagemBloqueio, 'error');
       return;
     }
+
     const prontoMessageBox=document.getElementById('nova-regra-msg');
     if(prontoMessageBox){
       prontoMessageBox.style.display='block';
