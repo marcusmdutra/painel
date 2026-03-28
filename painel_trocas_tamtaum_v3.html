@@ -208,7 +208,7 @@ select.form-control{cursor:pointer}
     <button class="btn-login" id="btn-entrar" onclick="fazerLogin()">Entrar</button>
     <div class="login-error" id="login-error">E-mail ou senha incorretos. Verifique e tente novamente.</div>
   </div>
-  <div class="login-footer">Desenvolvido por <strong>Marcus Dutra</strong> · Versão 3.1.3</div>
+  <div class="login-footer">Desenvolvido por <strong>Marcus Dutra</strong> · Versão 3.1.4</div>
 </div>
 <!-- ===== APP ===== -->
 <div id="app">
@@ -287,7 +287,7 @@ select.form-control{cursor:pointer}
             </div>
           </div>
           <table>
-            <thead><tr><th>Protocolo</th><th>Cliente</th><th>Peça</th><th>Cód. Logística</th><th>Valor Voucher</th><th>Status</th><th>Ações</th></tr></thead>
+            <thead><tr><th>Protocolo</th><th>Cliente</th><th>Pedido</th><th>Peça</th><th>Cód. Logística</th><th>Valor Voucher</th><th>Status</th><th>Ações</th></tr></thead>
             <tbody id="tabela-falecom"></tbody>
           </table>
         </div>
@@ -302,7 +302,7 @@ select.form-control{cursor:pointer}
         <div class="table-card">
           <div class="table-header"><h3>Conferência de Peças <span class="count" id="count-logistica"></span></h3></div>
           <table>
-            <thead><tr><th>Protocolo</th><th>Cliente</th><th>Peças Declaradas</th><th>Cód. Logística</th><th>Status</th><th>Ações</th></tr></thead>
+            <thead><tr><th>Protocolo</th><th>Cliente</th><th>Pedido</th><th>Peças Declaradas</th><th>Cód. Logística</th><th>Status</th><th>Ações</th></tr></thead>
             <tbody id="tabela-logistica"></tbody>
           </table>
         </div>
@@ -335,7 +335,7 @@ select.form-control{cursor:pointer}
         <div class="table-card">
           <div class="table-header"><h3>Casos em Retenção <span class="count" id="count-gerencia"></span></h3></div>
           <table>
-            <thead><tr><th>Protocolo</th><th>Cliente</th><th>Peça</th><th>Voucher</th><th>Observação</th><th>Decisão</th></tr></thead>
+            <thead><tr><th>Protocolo</th><th>Cliente</th><th>Pedido</th><th>Peça</th><th>Voucher</th><th>Observação</th><th>Decisão</th></tr></thead>
             <tbody id="tabela-gerencia"></tbody>
           </table>
         </div>
@@ -1012,7 +1012,7 @@ function buildTimelineHtml(t){
       existingKeys.add(key);
     }
   };
-  pushLine('solicitacao', t.linhaSolicitacao, 'Solicitação aberta', t.dataAbertura);
+  pushLine('solicitacao', t.linhaSolicitacao, 'Cliente solicitou logística', t.dataAbertura);
 
   // Só mostra eventos de logística quando a linha formatada existir de fato no Airtable
   pushLine('emissao', t.linhaLogistica, 'Logística Reversa Gerada', '');
@@ -1032,7 +1032,7 @@ function buildTimelineHtml(t){
   }
 
   const statusKeyMap = {
-    'Aguardando código de logística': 'aguardando_codigo_logistica',
+    'Aguardando código de logística': 'solicitacao',
     'Emissão da Logística Reversa': 'emissao',
     'Aguardando cliente': 'aguardando_cliente',
     'Peça recebida': 'peca_recebida',
@@ -1251,7 +1251,7 @@ function renderFalecom(){
   if(vouchers>0){alertEl.style.display='flex';document.getElementById('txt-alert-falecom').textContent=vouchers+' voucher'+(vouchers>1?'s':'')+' aguardando sua validação.';}
   else alertEl.style.display='none';
   const tbody=document.getElementById('tabela-falecom');
-  if(!fila.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--ink-muted)">Nenhum caso pendente 🎉</td></tr>';return}
+  if(!fila.length){tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--ink-muted)">Nenhum caso pendente 🎉</td></tr>';return}
   tbody.innerHTML=fila.map(r=>{
     const t = normalizeTroca(r);
     const status=t.status||'';
@@ -1262,9 +1262,10 @@ function renderFalecom(){
     return `<tr onclick="abrirDetalhe('${r.id}')">
       <td class="td-proto">${t.protocolo}</td>
       <td class="td-cliente">${t.cliente}</td>
+      <td>#${t.pedido}</td>
       <td style="font-size:12px">${t.pecasDeclaradas}</td>
       <td>${codLog?`<span class="td-logistica">${codLog}</span>`:'<span style="color:var(--ink-muted);font-size:12px">—</span>'}</td>
-      <td><strong style="color:var(--rose)">${formatCurrency(t.valorVoucher)}</strong></td>
+      <td>${t.voucherCodigo ? `<strong style="color:var(--rose)">${formatCurrency(t.valorVoucher)}</strong>` : '<span style="color:var(--ink-muted);font-size:12px">—</span>'}</td>
       <td><span class="badge ${badgeStatus(status)}">${status}</span></td>
       <td><div class="actions-row">${acoes}</div></td>
     </tr>`;
@@ -1280,7 +1281,7 @@ function renderLogistica(){
   document.getElementById('stat-log-hoje').textContent=0;
   document.getElementById('count-logistica').textContent=conferir+' a conferir';
   const tbody=document.getElementById('tabela-logistica');
-  if(!pecas.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--ink-muted)">Nenhuma peça aguardando conferência</td></tr>';return}
+  if(!pecas.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--ink-muted)">Nenhuma peça aguardando conferência</td></tr>';return}
   tbody.innerHTML=pecas.map(r=>{
     const t = normalizeTroca(r);
     const status=t.status||'';
@@ -1288,6 +1289,7 @@ function renderLogistica(){
     return `<tr onclick="abrirConferencia('${r.id}')">
       <td class="td-proto">${t.protocolo}</td>
       <td class="td-cliente">${t.cliente}</td>
+      <td>#${t.pedido}</td>
       <td style="font-size:12px">${t.pecasDeclaradas}</td>
       <td>${codLog?`<span class="td-logistica">${codLog}</span>`:'<span style="color:var(--ink-muted);font-size:12px">—</span>'}</td>
       <td><span class="badge ${badgeStatus(status)}">${status}</span></td>
@@ -1353,12 +1355,13 @@ function renderGerencia(){
   if(retencao.length>0){alertEl.style.display='flex';document.getElementById('txt-alert-gerencia').textContent=retencao.length+' caso'+(retencao.length>1?'s':'')+' em retenção aguarda'+(retencao.length>1?'m':'')+ ' sua decisão.';}
   else alertEl.style.display='none';
   const tbody=document.getElementById('tabela-gerencia');
-  if(!retencao.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--ink-muted)">Nenhum caso em retenção 🎉</td></tr>';return}
+  if(!retencao.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--ink-muted)">Nenhum caso em retenção 🎉</td></tr>';return}
   tbody.innerHTML=retencao.map(r=>{
     const t = normalizeTroca(r);
     return `<tr onclick="abrirRetencao('${r.id}')">
       <td class="td-proto">${t.protocolo}</td>
       <td class="td-cliente">${t.cliente}</td>
+      <td>#${t.pedido}</td>
       <td style="font-size:12px">${t.pecasDeclaradas}</td>
       <td><strong>${formatCurrency(t.valorVoucher)}</strong></td>
       <td style="max-width:180px;font-size:12px;color:var(--ink-muted)">${t.motivo||'—'}</td>
@@ -1425,6 +1428,7 @@ function abrirDetalhe(recordId){
   const prazoColor = t.trocaNoPrazo==='Sim' ? 'var(--green)' : t.trocaNoPrazo==='Não' ? 'var(--red)' : 'var(--ink)';
   const prazoText = t.trocaNoPrazo==='Sim' ? '✓ Sim' : t.trocaNoPrazo==='Não' ? '✗ Não' : t.trocaNoPrazo;
   const voucherValor = getVoucherAmount(t);
+  const voucherDisponivel = !!(t.voucherCodigo && String(t.voucherCodigo).trim()) && voucherValor > 0;
   const btnVoucherDetalhe=document.getElementById('btn-validar-voucher-detalhe');
   document.getElementById('modal-detalhe-grid').innerHTML=`
     <div class="detail-item"><label>Cliente</label><div class="value">${t.cliente}</div></div>
@@ -1434,9 +1438,9 @@ function abrirDetalhe(recordId){
     <div class="detail-item"><label>Motivo</label><div class="value">${t.motivo}</div></div>
     <div class="detail-item"><label>Desejo</label><div class="value">${t.desejo}</div></div>
     <div class="detail-item full"><label>Peças Declaradas</label><div class="value">${t.pecasDeclaradas}</div></div>
-    <div class="detail-item"><label>Valor do Voucher</label><div class="value" style="color:var(--rose);font-weight:700;font-size:18px">${formatCurrency(voucherValor)}</div></div>
+    ${voucherDisponivel?`<div class="detail-item"><label>Valor do Voucher</label><div class="value" style="color:var(--rose);font-weight:700;font-size:18px">${formatCurrency(voucherValor)}</div></div>`:''}
     <div class="detail-item"><label>Troca no Prazo</label><div class="value" style="color:${prazoColor}">${prazoText}</div></div>
-    ${t.voucherCodigo?`<div class="detail-item full"><label>Código do Voucher</label><div class="value" style="font-family:'DM Mono',monospace;color:var(--green);font-weight:700">${t.voucherCodigo}</div></div>`:''}
+    ${voucherDisponivel?`<div class="detail-item full"><label>Código do Voucher</label><div class="value" style="font-family:'DM Mono',monospace;color:var(--green);font-weight:700">${t.voucherCodigo}</div></div>`:''}
     ${t.codigoLogistica?`<div class="detail-item full"><label>Código de Logística Atual</label><div class="value" style="font-family:'DM Mono',monospace;font-size:16px;color:var(--blue);font-weight:700">${t.codigoLogistica}</div></div>`:''}
     ${t.codigoLogisticaAnterior?`<div class="detail-item full"><label>Código de Logística Anterior</label><div class="value" style="font-family:'DM Mono',monospace;color:var(--ink-soft);font-weight:700">${t.codigoLogisticaAnterior}</div></div>`:''}
     ${t.tentativaLogistica?`<div class="detail-item"><label>Tentativa de Logística</label><div class="value">${t.tentativaLogistica}</div></div>`:''}
@@ -1657,8 +1661,8 @@ function abrirConferencia(recordId){
   if(!rec) return;
   currentRecord=rec;
   const t = normalizeTroca(rec);
-  document.getElementById('modal-conf-proto').textContent=`${t.protocolo} · ${t.cliente}`;
-  document.getElementById('modal-conf-alert').textContent=`📦 Peça chegou. Confira cada item e registre a condição.`;
+  document.getElementById('modal-conf-proto').textContent=`${t.protocolo} · Pedido #${t.pedido} · ${t.cliente}`;
+  document.getElementById('modal-conf-alert').textContent=`📦 Pedido #${t.pedido}. Peça chegou. Confira cada item e registre a condição.`;
   document.getElementById('modal-conf-logistica').textContent=t.codigoLogistica||'—';
   const pecas=(t.pecasDeclaradas==='—'?'':t.pecasDeclaradas).split('\n').map(v=>v.trim()).filter(Boolean);
   const codigos=(t.codigosDeclarados||'').split('\n').map(v=>v.trim()).filter(Boolean);
