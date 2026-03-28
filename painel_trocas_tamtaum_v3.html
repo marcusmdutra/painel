@@ -157,6 +157,18 @@ select.form-control{cursor:pointer}
 .check-item input[type=checkbox]{width:16px;height:16px;accent-color:var(--green);cursor:pointer}
 .check-item .item-name{font-size:13px;font-weight:600;flex:1}
 .check-item .item-code{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink-muted)}
+.conf-item{display:block;padding:14px 16px}
+.conf-item-top{display:flex;align-items:flex-start;gap:10px}
+.conf-item-top input[type=checkbox]{margin-top:2px}
+.conf-item-main{flex:1;min-width:0}
+.conf-item-meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;font-size:11px;color:var(--ink-muted)}
+.conf-item-qty{display:grid;grid-template-columns:160px 100px;gap:10px;align-items:center;margin-top:10px}
+.conf-item-qty label{font-size:11px;font-weight:700;color:var(--ink-muted);text-transform:uppercase;letter-spacing:.6px}
+.qty-input{padding:8px 10px;font-size:13px}
+.conf-extra-box{display:none}
+.conf-extra-box.open{display:block}
+.conf-empty{padding:12px 14px;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;font-size:12px;color:var(--ink-muted)}
+.conf-help{font-size:12px;color:var(--ink-muted);margin-top:-4px;margin-bottom:10px}
 .alert{padding:12px 16px;border-radius:8px;font-size:13px;margin-bottom:16px;display:flex;align-items:flex-start;gap:10px}
 .alert-info{background:var(--blue-bg);color:var(--blue);border:1px solid #C8DEFF}
 .alert-success{background:var(--green-bg);color:var(--green);border:1px solid #B8EDDA}
@@ -208,7 +220,7 @@ select.form-control{cursor:pointer}
     <button class="btn-login" id="btn-entrar" onclick="fazerLogin()">Entrar</button>
     <div class="login-error" id="login-error">E-mail ou senha incorretos. Verifique e tente novamente.</div>
   </div>
-  <div class="login-footer">Desenvolvido por <strong>Marcus Dutra</strong> · Versão 3.1.4</div>
+  <div class="login-footer">Desenvolvido por <strong>Marcus Dutra</strong> · Versão 3.1.5</div>
 </div>
 <!-- ===== APP ===== -->
 <div id="app">
@@ -393,7 +405,7 @@ select.form-control{cursor:pointer}
       <button class="modal-close" onclick="closeModal('modal-conferencia')">✕</button>
     </div>
     <div class="modal-body">
-      <div class="alert alert-info" id="modal-conf-alert">📦 Confira cada item e registre a condição.</div>
+      <div class="alert alert-info" id="modal-conf-alert">📦 Confira somente as peças declaradas na solicitação. Se chegar peça fora do combinado, registre como divergência.</div>
       <div class="section-divider">Código de Logística</div>
       <div class="logistica-box">
         <div>
@@ -402,8 +414,26 @@ select.form-control{cursor:pointer}
         </div>
         <span style="font-size:24px">📬</span>
       </div>
-      <div class="section-divider">Itens Declarados</div>
+      <div class="section-divider">Peças esperadas nesta devolução</div>
+      <div class="conf-help">Marque apenas o que realmente chegou da solicitação inicial e informe a quantidade recebida.</div>
       <div class="check-list" id="modal-conf-items"></div>
+      <div class="section-divider">Divergência da Solicitação</div>
+      <div class="form-group">
+        <label>Peças recebidas divergente da solicitação?</label>
+        <select class="form-control" id="modal-conf-divergencia" onchange="toggleConferenciaDivergencia()">
+          <option value="Não">Não</option>
+          <option value="Sim">Sim</option>
+        </select>
+      </div>
+      <div class="conf-extra-box" id="modal-conf-divergencia-box">
+        <div class="alert alert-warning">⚠️ Se a cliente enviou peça fora da solicitação inicial, marque abaixo somente as peças extras que chegaram.</div>
+        <div class="section-divider">Peças extras recebidas</div>
+        <div class="check-list" id="modal-conf-extra-items"></div>
+        <div class="form-group">
+          <label>Motivo da divergência / observação</label>
+          <textarea class="form-control" id="modal-conf-divergencia-motivo" placeholder="Explique a divergência do recebimento..."></textarea>
+        </div>
+      </div>
       <div class="section-divider">Condição</div>
       <div class="form-group">
         <label>Condição geral</label>
@@ -1415,300 +1445,231 @@ function atualizarBadges(){
   });
 }
 // ===== MODAIS DE AÇÃO =====
-function abrirDetalhe(recordId){
-  const rec=allTrocas.find(r=>r.id===recordId);
-  if(!rec) return;
-  currentRecord=rec;
-  const t = normalizeTroca(rec);
-  document.getElementById('modal-detalhe-proto').innerHTML=`${t.protocolo} &nbsp;<span class="badge ${badgeStatus(t.status)}">${t.status}</span>`;
-  const logBox=document.getElementById('modal-logistica-box');
-  const logCode=document.getElementById('modal-logistica-code');
-  if(t.codigoLogistica){logCode.textContent=t.codigoLogistica;logBox.style.display='flex';}
-  else{logBox.style.display='none';}
-  const prazoColor = t.trocaNoPrazo==='Sim' ? 'var(--green)' : t.trocaNoPrazo==='Não' ? 'var(--red)' : 'var(--ink)';
-  const prazoText = t.trocaNoPrazo==='Sim' ? '✓ Sim' : t.trocaNoPrazo==='Não' ? '✗ Não' : t.trocaNoPrazo;
-  const voucherValor = getVoucherAmount(t);
-  const voucherDisponivel = !!(t.voucherCodigo && String(t.voucherCodigo).trim()) && voucherValor > 0;
-  const btnVoucherDetalhe=document.getElementById('btn-validar-voucher-detalhe');
-  document.getElementById('modal-detalhe-grid').innerHTML=`
-    <div class="detail-item"><label>Cliente</label><div class="value">${t.cliente}</div></div>
-    <div class="detail-item"><label>Pedido</label><div class="value">#${t.pedido}</div></div>
-    <div class="detail-item"><label>E-mail</label><div class="value">${t.email}</div></div>
-    <div class="detail-item"><label>Telefone</label><div class="value">${t.telefone}</div></div>
-    <div class="detail-item"><label>Motivo</label><div class="value">${t.motivo}</div></div>
-    <div class="detail-item"><label>Desejo</label><div class="value">${t.desejo}</div></div>
-    <div class="detail-item full"><label>Peças Declaradas</label><div class="value">${t.pecasDeclaradas}</div></div>
-    ${voucherDisponivel?`<div class="detail-item"><label>Valor do Voucher</label><div class="value" style="color:var(--rose);font-weight:700;font-size:18px">${formatCurrency(voucherValor)}</div></div>`:''}
-    <div class="detail-item"><label>Troca no Prazo</label><div class="value" style="color:${prazoColor}">${prazoText}</div></div>
-    ${voucherDisponivel?`<div class="detail-item full"><label>Código do Voucher</label><div class="value" style="font-family:'DM Mono',monospace;color:var(--green);font-weight:700">${t.voucherCodigo}</div></div>`:''}
-    ${t.codigoLogistica?`<div class="detail-item full"><label>Código de Logística Atual</label><div class="value" style="font-family:'DM Mono',monospace;font-size:16px;color:var(--blue);font-weight:700">${t.codigoLogistica}</div></div>`:''}
-    ${t.codigoLogisticaAnterior?`<div class="detail-item full"><label>Código de Logística Anterior</label><div class="value" style="font-family:'DM Mono',monospace;color:var(--ink-soft);font-weight:700">${t.codigoLogisticaAnterior}</div></div>`:''}
-    ${t.tentativaLogistica?`<div class="detail-item"><label>Tentativa de Logística</label><div class="value">${t.tentativaLogistica}</div></div>`:''}
-    ${t.reemissaoLogistica?`<div class="detail-item"><label>Reemissão de Logística</label><div class="value">${t.reemissaoLogistica}</div></div>`:''}
-    ${t.motivoReemissaoLogistica?`<div class="detail-item full"><label>Motivo Reemissão Logística</label><div class="value">${t.motivoReemissaoLogistica}</div></div>`:''}
-    ${t.resultadoRetencao?`<div class="detail-item"><label>Resultado da Retenção</label><div class="value">${t.resultadoRetencao}</div></div>`:''}
-    ${t.idTransacaoPagarme?`<div class="detail-item"><label>ID Transação Pagar.me</label><div class="value" style="font-family:'DM Mono',monospace">${t.idTransacaoPagarme}</div></div>`:''}
-    ${t.dataEnvioComprovante?`<div class="detail-item"><label>Comprovante Enviado</label><div class="value">${formatDate(t.dataEnvioComprovante)}</div></div>`:''}
-    ${t.observacaoEstorno?`<div class="detail-item full"><label>Observação do Estorno</label><div class="value">${t.observacaoEstorno}</div></div>`:''}
+let conferenciaContext = { declarados: [], extrasDisponiveis: [], pedidoProdutos: [] };
+
+function safeJsonParse(value, fallback){
+  if(value===undefined || value===null || value==='') return fallback;
+  try{ return JSON.parse(value); }catch{ return fallback; }
+}
+function buildConferenciaItemHtml(item, type='declarado'){
+  const nome = escapeHtml(item.nome || item.descricao || 'Peça sem nome');
+  const codigo = escapeHtml(item.codigo || 'Sem código');
+  const expected = Math.max(1, Number(item.quantidadeEsperada || item.quantidade || 1) || 1);
+  const received = Math.max(0, Number(item.quantidadeRecebida || item.quantidade_recebida || 0) || 0);
+  const checked = !!item.recebido;
+  const placeholder = type==='extra' ? 'Obs. da peça extra' : 'Obs. do item';
+  const labelQty = type==='extra' ? 'Qtd recebida' : 'Qtd recebida';
+  const meta = type==='extra'
+    ? `<span>Qtd no pedido: ${expected}</span><span>Peça fora da solicitação</span>`
+    : `<span>Qtd esperada: ${expected}</span><span>Solicitada pela cliente</span>`;
+  return `
+    <div class="check-item conf-item ${checked ? 'checked' : ''}" data-tipo="${type}" data-codigo="${codigo}" data-nome="${nome}" data-quantidade-esperada="${expected}">
+      <div class="conf-item-top">
+        <input type="checkbox" ${checked ? 'checked' : ''} onchange="syncCheckItem(this);toggleConferenciaQty(this)">
+        <div class="conf-item-main">
+          <div class="item-name">${nome}</div>
+          <div class="item-code">${codigo}</div>
+          <div class="conf-item-meta">${meta}</div>
+          <div class="conf-item-qty">
+            <label>${labelQty}</label>
+            <input type="number" class="form-control qty-input" min="0" step="1" value="${checked ? Math.max(1, received || expected) : received}" ${checked ? '' : 'disabled'}>
+          </div>
+          <div class="form-group" style="margin-top:10px;margin-bottom:0">
+            <label style="font-size:11px">Observação do item</label>
+            <input type="text" class="form-control item-observacao" placeholder="${placeholder}" value="${escapeHtml(item.observacao || item.observacao_item || '')}">
+          </div>
+        </div>
+      </div>
+    </div>
   `;
-  document.getElementById('modal-detalhe-timeline').innerHTML=buildTimelineHtml(t);
-  const btnLog=document.getElementById('btn-gerar-logistica-detalhe');
-  btnLog.style.display=statusMatches(t.status,'Aguardando código de logística')?'flex':'none';
-  btnVoucherDetalhe.style.display=statusMatches(t.status,'Aguardando validação voucher')?'flex':'none';
-  openModal('modal-detalhe');
 }
-function abrirLogisticaManualComDados(){
-  if(!currentRecord) return;
-  const f=currentRecord.fields;
-  preencherLogisticaManual(currentRecord.id);
-  closeModal('modal-detalhe');
+function parseDeclaradosConferencia(t){
+  const pecas = (t.pecasDeclaradas==='—' ? '' : t.pecasDeclaradas).split('\n').map(v=>v.trim()).filter(Boolean);
+  const codigos = (t.codigosDeclarados || '').split('\n').map(v=>v.trim()).filter(Boolean);
+  const itensJson = safeJsonParse(currentRecord?.fields?.['Itens Conferidos JSON'], []);
+  const recebidas = (t.pecasRecebidas || '').split('\n').map(v=>v.trim()).filter(Boolean);
+  return pecas.map((nome,i)=>{
+    const codigo = codigos[i] || '';
+    const existente = Array.isArray(itensJson) ? itensJson.find(item => (item.codigo||'')===codigo || (item.nome||item.descricao||'')===nome) : null;
+    return {
+      nome,
+      codigo,
+      quantidadeEsperada: Number(existente?.quantidade_esperada || existente?.quantidadeEsperada || 1) || 1,
+      quantidadeRecebida: Number(existente?.quantidade_recebida || existente?.quantidadeRecebida || (recebidas.includes(nome) ? 1 : 0)) || 0,
+      recebido: existente ? !!existente.recebido : recebidas.includes(nome),
+      observacao: existente?.observacao_item || existente?.observacao || ''
+    };
+  });
 }
-function preencherLogisticaManual(recordId){
-  const rec=allTrocas.find(r=>r.id===recordId);
-  if(rec){
-    const t = normalizeTroca(rec);
-    document.getElementById('logmanual-protocolo').value=t.protocolo==='—'?'':t.protocolo;
-    document.getElementById('logmanual-pedido').value=t.pedido==='—'?'':t.pedido;
-    document.getElementById('logmanual-recordid').value=rec.id;
-    document.getElementById('logmanual-cliente').value=t.cliente==='—'?'':t.cliente;
-    document.getElementById('logmanual-telefone').value=t.telefone==='—'?'':t.telefone;
+function parseExtrasConferencia(){
+  const extrasJson = safeJsonParse(currentRecord?.fields?.['Itens Extras Recebidos JSON'], []);
+  const extras = conferenciaContext.extrasDisponiveis || [];
+  return extras.map(item=>{
+    const existente = Array.isArray(extrasJson) ? extrasJson.find(extra => (extra.codigo||'') === (item.codigo||'')) : null;
+    return {
+      ...item,
+      quantidadeEsperada: Number(item.quantidadeEsperada || item.quantidade || 1) || 1,
+      quantidadeRecebida: Number(existente?.quantidade_recebida || existente?.quantidadeRecebida || 0) || 0,
+      recebido: !!existente,
+      observacao: existente?.observacao || ''
+    };
+  });
+}
+function renderConferenciaItens(){
+  document.getElementById('modal-conf-items').innerHTML = (conferenciaContext.declarados || []).map(item => buildConferenciaItemHtml(item, 'declarado')).join('') || '<div class="conf-empty">Nenhuma peça declarada foi encontrada nesta solicitação.</div>';
+}
+function renderConferenciaExtras(){
+  const extras = parseExtrasConferencia();
+  const container = document.getElementById('modal-conf-extra-items');
+  if(!extras.length){
+    container.innerHTML = '<div class="conf-empty">Nenhuma peça extra disponível no pedido para marcar como divergência.</div>';
+    return;
   }
-  openModal('modal-logistica-manual');
+  container.innerHTML = extras.map(item => buildConferenciaItemHtml(item, 'extra')).join('');
 }
-async function gerarLogisticaManual(){
-  const protocolo=document.getElementById('logmanual-protocolo').value.trim();
-  const pedido=document.getElementById('logmanual-pedido').value.trim();
-  const recordId=document.getElementById('logmanual-recordid').value.trim();
-  const cliente=document.getElementById('logmanual-cliente').value.trim();
-  const telefone=document.getElementById('logmanual-telefone').value.trim();
-  if(!pedido||!recordId||!cliente||!telefone){showToast('Preencha todos os campos obrigatórios','error');return}
-  showLoading();
+function toggleConferenciaQty(input){
+  const item = input.closest('.check-item');
+  if(!item) return;
+  const qtyInput = item.querySelector('.qty-input');
+  const expected = Math.max(1, Number(item.dataset.quantidadeEsperada || 1) || 1);
+  if(qtyInput){
+    qtyInput.disabled = !input.checked;
+    if(input.checked && (!qtyInput.value || Number(qtyInput.value) <= 0)) qtyInput.value = expected;
+    if(!input.checked) qtyInput.value = '0';
+  }
+}
+function toggleConferenciaDivergencia(){
+  const value = document.getElementById('modal-conf-divergencia')?.value || 'Não';
+  const box = document.getElementById('modal-conf-divergencia-box');
+  if(!box) return;
+  box.classList.toggle('open', value === 'Sim');
+  if(value === 'Sim') renderConferenciaExtras();
+}
+async function carregarExtrasConferencia(t){
+  conferenciaContext.pedidoProdutos = [];
+  conferenciaContext.extrasDisponiveis = [];
+  const extrasContainer = document.getElementById('modal-conf-extra-items');
+  if(extrasContainer) extrasContainer.innerHTML = '<div class="conf-empty">Carregando peças do pedido...</div>';
   try{
-    const res=await fetch(`${N8N_BASE}/gerar-logistica-reversa`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({numero_pedido:pedido, airtable_record_id:recordId, cliente, telefone, protocolo})
+    const data = await postJson(`${N8N_BASE}/consulta-pedido`, { numero_pedido: t.pedido });
+    const pedidoData = extractWorkflowPayload(data);
+    const produtos = Array.isArray(pedidoData.produtos) ? pedidoData.produtos : [];
+    conferenciaContext.pedidoProdutos = produtos.map(p => ({
+      nome: p.nome || p.descricao || '',
+      codigo: p.codigoVariacao || p.modelo || '',
+      quantidadeEsperada: 1
+    }));
+    const declaradosCodigo = new Set((conferenciaContext.declarados || []).map(item => item.codigo).filter(Boolean));
+    const declaradosNome = new Set((conferenciaContext.declarados || []).map(item => item.nome).filter(Boolean));
+    conferenciaContext.extrasDisponiveis = conferenciaContext.pedidoProdutos.filter(item => {
+      if(item.codigo && declaradosCodigo.has(item.codigo)) return false;
+      if(!item.codigo && declaradosNome.has(item.nome)) return false;
+      return true;
     });
-    closeModal('modal-logistica-manual');
-    showToast('Logística gerada! Código enviado para a cliente via WhatsApp.','success');
-    setTimeout(()=>carregarDados(),3000);
-  }catch(e){
-    showToast('Erro ao gerar logística. Tente novamente.','error');
+  }catch(err){
+    console.error('Erro ao carregar peças do pedido para conferência:', err);
+    conferenciaContext.extrasDisponiveis = [];
   }finally{
-    hideLoading();
+    if((document.getElementById('modal-conf-divergencia')?.value || 'Não') === 'Sim') renderConferenciaExtras();
   }
 }
-function abrirVoucher(recordId){
+function collectConferenciaItems(selector){
+  return [...document.querySelectorAll(selector)].map(item => {
+    const checkbox = item.querySelector('input[type=checkbox]');
+    const qtyInput = item.querySelector('.qty-input');
+    const observacaoInput = item.querySelector('.item-observacao');
+    const quantidadeEsperada = Math.max(1, Number(item.dataset.quantidadeEsperada || 1) || 1);
+    const quantidadeRecebida = Math.max(0, Number(qtyInput?.value || 0) || 0);
+    return {
+      nome: item.dataset.nome || '',
+      codigo: item.dataset.codigo || '',
+      recebido: !!checkbox?.checked,
+      quantidade_esperada: quantidadeEsperada,
+      quantidade_recebida: checkbox?.checked ? quantidadeRecebida : 0,
+      observacao_item: (observacaoInput?.value || '').trim()
+    };
+  });
+}
+function computeTipoDevolucao(itens=[]){
+  const ativos = itens.filter(item => item.recebido && item.quantidade_recebida > 0);
+  if(!ativos.length) return '';
+  const total = itens.every(item => item.recebido && item.quantidade_recebida >= item.quantidade_esperada);
+  return total ? 'Total' : 'Parcial';
+}
+
+async function abrirConferencia(recordId){
   const rec=allTrocas.find(r=>r.id===recordId);
   if(!rec) return;
   currentRecord=rec;
   const t = normalizeTroca(rec);
-  const prazoColor = t.trocaNoPrazo==='Sim' ? 'var(--green)' : t.trocaNoPrazo==='Não' ? 'var(--red)' : 'var(--ink)';
-  const voucherValor = getVoucherAmount(t);
-  document.getElementById('modal-voucher-proto').textContent=`${t.protocolo} · ${t.cliente}`;
-  document.getElementById('modal-voucher-valor').textContent=formatCurrency(voucherValor);
-  document.getElementById('modal-voucher-desc').textContent=t.pecasDeclaradas;
-  const voucherInfo = t.voucherCodigo ? `<div class="detail-item full"><label>Voucher Gerado</label><div class="value" style="font-family:'DM Mono',monospace;color:var(--green);font-weight:700">${t.voucherCodigo}</div></div>` : '';
-  document.getElementById('modal-voucher-grid').innerHTML=`
-    <div class="detail-item"><label>Pedido Original</label><div class="value">#${t.pedido}</div></div>
-    <div class="detail-item"><label>2ª Troca?</label><div class="value">${t.is2atroca?'Sim — apenas voucher':'Não — 1ª troca'}</div></div>
-    <div class="detail-item"><label>Valor do Voucher</label><div class="value">${formatCurrency(voucherValor)}</div></div>
-    <div class="detail-item"><label>Troca no Prazo</label><div class="value" style="color:${prazoColor}">${t.trocaNoPrazo}</div></div>
-    <div class="detail-item"><label>E-mail</label><div class="value">${t.email}</div></div>
-    <div class="detail-item"><label>Telefone</label><div class="value">${t.telefone}</div></div>
-    ${voucherInfo}
-  `;
-  openModal('modal-voucher');
-}
-async function validarEEnviarVoucher(){
-  if(!currentRecord) return;
-  const rec=currentRecord;
-  const t = normalizeTroca(rec);
-  const payload = {
-    airtable_record_id: rec.id,
-    numero_pedido: String(t.pedido || '').replace(/^#/, ''),
-    cliente: t.cliente === '—' ? '' : t.cliente,
-    telefone: t.telefone === '—' ? '' : t.telefone,
-    email: t.email === '—' ? '' : t.email,
-    valor_voucher: getVoucherAmount(t),
-    codigo_voucher: t.voucherCodigo || '',
-    protocolo: t.protocolo === '—' ? '' : t.protocolo
-  };
-
-  if(!payload.airtable_record_id){
-    showToast('Não foi possível identificar o registro da solicitação.','error');
-    return;
-  }
-  if(!payload.telefone){
-    showToast('Telefone da cliente não encontrado nesta solicitação.','warning');
-    return;
-  }
-  if(!payload.codigo_voucher){
-    showToast('Código do voucher não encontrado para esta solicitação.','warning');
-    return;
-  }
-  if(!(payload.valor_voucher > 0)){
-    showToast('Valor do voucher inválido para envio.','warning');
-    return;
-  }
-
-  showLoading();
-  try{
-    const data = await postJson(`${N8N_BASE}/enviar-voucher`, payload);
-    closeModal('modal-voucher');
-    closeModal('modal-detalhe');
-    const msg = data?.mensagem || 'Voucher enviado para a cliente com sucesso.';
-    showToast(msg,'success');
-    setTimeout(()=>carregarDados(),1800);
-  }catch(e){
-    console.error('Erro ao enviar voucher:', e);
-    showToast(e.message || 'Erro ao enviar o voucher para a cliente.','error');
-  }finally{
-    hideLoading();
-  }
-}
-
-function enviarParaRetencao(){
-  if(!currentRecord) return;
-  abrirRetencao(currentRecord.id);
-}
-function abrirRetencao(recordId){
-  const rec=allTrocas.find(r=>r.id===recordId);
-  if(!rec) return;
-  currentRecord=rec;
-  const t = normalizeTroca(rec);
-  document.getElementById('modal-ret-proto').textContent=`${t.protocolo} · ${t.cliente}`;
-  document.getElementById('modal-ret-motivo').textContent=`🔴 ${t.motivo||'Cliente solicitou retenção.'}`;
-  document.getElementById('modal-ret-grid').innerHTML=`
-    <div class="detail-item"><label>Peça</label><div class="value">${t.pecasDeclaradas}</div></div>
-    <div class="detail-item"><label>Pedido</label><div class="value">#${t.pedido}</div></div>
-    <div class="detail-item"><label>Valor Voucher</label><div class="value" style="color:var(--green);font-weight:700">${formatCurrency(t.valorVoucher)}</div></div>
-    <div class="detail-item"><label>2ª Troca?</label><div class="value">${t.is2atroca?'Sim — sem estorno possível':'Não'}</div></div>
-  `;
-  const btnEstorno=document.getElementById('btn-autorizar-estorno');
-  btnEstorno.style.display=t.is2atroca?'none':'flex';
-  document.getElementById('modal-ret-obs').value='';
-  const setor=currentUser.setor;
-  const podeDecidirDoc=['Admin','Gerência'].includes(setor);
-  document.getElementById('btn-autorizar-voucher').style.display=podeDecidirDoc?'flex':'none';
-  document.getElementById('btn-autorizar-estorno').style.display=(podeDecidirDoc&&!t.is2atroca)?'flex':'none';
-  openModal('modal-retencao');
-}
-async function autorizarVoucher(){
-  if(!currentRecord) return;
-  const t = normalizeTroca(currentRecord);
-  const obs=document.getElementById('modal-ret-obs')?.value?.trim() || '';
-  showLoading();
-  try{
-    if(obs){
-      await updateAirtable(BASE_TROCAS, TABLE_TROCAS, currentRecord.id, {
-        'Observação Gerência': obs,
-        'Data Atualização Manual': new Date().toISOString()
-      });
-    }
-    if(t.voucherCodigo){
-      await updateAirtable(BASE_TROCAS, TABLE_TROCAS, currentRecord.id, {
-        'Status Atual': 'Aguardando validação voucher'
-      });
-      closeModal('modal-retencao');
-      showToast('Voucher já existente. Caso devolvido para a fila do Falecom.','success');
-      setTimeout(()=>carregarDados(),1500);
-      return;
-    }
-    await fetch(`${N8N_BASE}/gerar-voucher`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        airtable_record_id:currentRecord.id,
-        numero_pedido:t.pedido,
-        cliente:t.cliente,
-        valor_voucher:getVoucherAmount(t)
-      })
-    });
-    closeModal('modal-retencao');
-    showToast('Voucher autorizado! Geração acionada para retornar ao Falecom.','success');
-    setTimeout(()=>carregarDados(),2500);
-  }catch(e){
-    console.error('Erro ao autorizar voucher:', e);
-    showToast('Erro ao autorizar voucher','error');
-  }finally{
-    hideLoading();
-  }
-}
-
-async function autorizarEstorno(){
-  if(!currentRecord) return;
-  showLoading();
-  try{
-    await updateAirtable(BASE_TROCAS, TABLE_TROCAS, currentRecord.id, {
-      'Status Atual':'Aguardando Estorno',
-      'Resultado da Retenção':'Seguiu para estorno',
-      'Motivo do Estorno': normalizeTroca(currentRecord).motivo || '',
-      'Observação do Estorno': document.getElementById('modal-ret-obs').value.trim() || ''
-    });
-    closeModal('modal-retencao');
-    showToast('Caso enviado para o financeiro para seguir com o estorno.','success');
-    setTimeout(()=>carregarDados(),1500);
-  }catch(e){
-    console.error('Erro ao autorizar estorno:', e);
-    showToast('Erro ao autorizar estorno','error');
-  }finally{
-    hideLoading();
-  }
-}
-function abrirConferencia(recordId){
-  const rec=allTrocas.find(r=>r.id===recordId);
-  if(!rec) return;
-  currentRecord=rec;
-  const t = normalizeTroca(rec);
+  conferenciaContext = { declarados: parseDeclaradosConferencia(t), extrasDisponiveis: [], pedidoProdutos: [] };
   document.getElementById('modal-conf-proto').textContent=`${t.protocolo} · Pedido #${t.pedido} · ${t.cliente}`;
-  document.getElementById('modal-conf-alert').textContent=`📦 Pedido #${t.pedido}. Peça chegou. Confira cada item e registre a condição.`;
+  document.getElementById('modal-conf-alert').textContent=`📦 Pedido #${t.pedido}. Confira primeiro as peças declaradas pela cliente. Se vier peça fora da solicitação, registre como divergência.`;
   document.getElementById('modal-conf-logistica').textContent=t.codigoLogistica||'—';
-  const pecas=(t.pecasDeclaradas==='—'?'':t.pecasDeclaradas).split('\n').map(v=>v.trim()).filter(Boolean);
-  const codigos=(t.codigosDeclarados||'').split('\n').map(v=>v.trim()).filter(Boolean);
-  const recebidas=(t.pecasRecebidas||'').split('\n').map(v=>v.trim()).filter(Boolean);
-  document.getElementById('modal-conf-items').innerHTML=pecas.map((p,i)=>{
-    const codigo=codigos[i]||'';
-    const checked=recebidas.includes(p);
-    return `
-      <label class="check-item ${checked ? 'checked' : ''}">
-        <input type="checkbox" ${checked ? 'checked' : ''} onchange="syncCheckItem(this)">
-        <div class="item-name">${p}</div>
-        <div class="item-code">${codigo}</div>
-      </label>
-    `;
-  }).join('');
   document.getElementById('modal-conf-condicao').value='';
   document.getElementById('modal-conf-obs').value='';
+  document.getElementById('modal-conf-divergencia').value=currentRecord?.fields?.['Peças Recebidas Divergente da Solicitação'] || 'Não';
+  document.getElementById('modal-conf-divergencia-motivo').value=currentRecord?.fields?.['Motivo Divergência Recebimento'] || '';
+  renderConferenciaItens();
+  toggleConferenciaDivergencia();
   openModal('modal-conferencia');
+  await carregarExtrasConferencia(t);
 }
 async function confirmarRecebimento(){
   if(!currentRecord) return;
   const t = normalizeTroca(currentRecord);
   const condicao=document.getElementById('modal-conf-condicao').value;
   if(!condicao){showToast('Selecione a condição das peças','warning');return}
-  const checkedInputs=[...document.querySelectorAll('#modal-conf-items input[type=checkbox]:checked')];
-  if(!checkedInputs.length){showToast('Marque ao menos 1 item recebido','warning');return}
-  const selectedItems = checkedInputs.map(cb => cb.closest('.check-item')).filter(Boolean);
-  const pecasRecebidas = selectedItems.map(item => item.querySelector('.item-name')?.textContent?.trim()).filter(Boolean);
-  const codigosConferidos = selectedItems.map(item => item.querySelector('.item-code')?.textContent?.trim()).filter(Boolean);
+
+  const itensDeclarados = collectConferenciaItems('#modal-conf-items .check-item');
+  const itensRecebidos = itensDeclarados.filter(item => item.recebido && item.quantidade_recebida > 0);
+  if(!itensRecebidos.length){showToast('Marque ao menos 1 item recebido da solicitação','warning');return}
+
+  const divergenciaSolicitacao = (document.getElementById('modal-conf-divergencia')?.value || 'Não') === 'Sim';
+  const itensExtras = collectConferenciaItems('#modal-conf-extra-items .check-item').filter(item => item.recebido && item.quantidade_recebida > 0);
+  const motivoDivergencia = document.getElementById('modal-conf-divergencia-motivo').value.trim();
+  if(divergenciaSolicitacao && !itensExtras.length){
+    showToast('Marque ao menos 1 peça extra recebida ou mantenha a divergência como Não.','warning');
+    return;
+  }
+
+  const pecasRecebidas = itensRecebidos.map(item => item.nome).filter(Boolean);
+  const codigosConferidos = itensRecebidos.map(item => item.codigo).filter(Boolean);
   const observacao=document.getElementById('modal-conf-obs').value.trim();
   const fluxoEstorno = isRefundRequest(t);
-  const proximoStatus = fluxoEstorno ? 'Em Retenção pela Gerência' : 'Aguardando voucher';
+  const condicaoBloqueante = /divergente|danificada/i.test(condicao);
+  const temDivergencia = divergenciaSolicitacao || condicaoBloqueante;
+  const conferenciaOk = !temDivergencia;
+  const tipoDevolucao = computeTipoDevolucao(itensDeclarados);
+  const proximoStatus = temDivergencia ? 'Divergência na Conferência' : (fluxoEstorno ? 'Em Retenção pela Gerência' : 'Aguardando voucher');
+  const nowIso = new Date().toISOString();
+
   const fields = {
     'Status Atual': proximoStatus,
     'Peças Recebidas': pecasRecebidas.join('\n'),
     'Códigos Conferidos': codigosConferidos.join('\n'),
-    'Conferência OK?': condicao.toLowerCase().includes('ok') ? 'OK' : condicao,
-    'Data do Recebimento na Empresa': t.dataRecebimento || new Date().toISOString()
+    'Conferência OK?': conferenciaOk ? 'OK' : condicao,
+    'Data do Recebimento na Empresa': t.dataRecebimento || nowIso,
+    'Itens Conferidos JSON': JSON.stringify(itensDeclarados, null, 2),
+    'Peças Recebidas Divergente da Solicitação': divergenciaSolicitacao ? 'Sim' : 'Não',
+    'Itens Extras Recebidos JSON': JSON.stringify(itensExtras, null, 2),
+    'Motivo Divergência Recebimento': temDivergencia ? (motivoDivergencia || observacao || condicao) : '',
+    'Tipo Devolução Calculada': tipoDevolucao || 'Parcial',
+    'NF Entrada Liberada': conferenciaOk ? 'Sim' : 'Não',
+    'Divergência na Conferência': temDivergencia ? 'Sim' : 'Não',
+    'Data Atualização Manual': nowIso
   };
-  if(observacao){
-    fields['Data Atualização Manual']=new Date().toISOString();
-  }
 
   showLoading();
   try{
     await updateAirtable(BASE_TROCAS, TABLE_TROCAS, currentRecord.id, fields);
+
+    if(temDivergencia){
+      closeModal('modal-conferencia');
+      showToast('Conferência salva com divergência. Caso bloqueado para análise antes da NF de entrada.','warning');
+      setTimeout(()=>carregarDados(),1500);
+      return;
+    }
 
     if(fluxoEstorno){
       closeModal('modal-conferencia');
@@ -1752,7 +1713,8 @@ async function confirmarRecebimento(){
     hideLoading();
   }
 }
-function abrirEstorno(recordId){
+
+async function abrirEstorno(recordId){
   const rec=allTrocas.find(r=>r.id===recordId);
   if(!rec) return;
   currentRecord=rec;
