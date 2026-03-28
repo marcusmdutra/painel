@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tamtaum — Painel de Trocas</title>
+<title>Tamtaum — Painel de Trocas v3.1.6</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -227,7 +227,7 @@ select.form-control{cursor:pointer}
   <aside class="sidebar">
     <div class="sidebar-logo">
       <div class="brand">TAMTAUM</div>
-      <div class="sub">Painel de Trocas</div>
+      <div class="sub">Painel de Trocas • v3.1.6</div>
     </div>
     <nav class="sidebar-nav" id="sidebar-nav"></nav>
     <div class="sidebar-user">
@@ -643,6 +643,7 @@ const TABLE_USUARIOS = 'tblLmQKTpQv8E446q';
 const BASE_CARRINHOS = 'appf4sifttkxfxC2N';
 const TABLE_CARRINHOS = 'tbl4dJkYgu1Tkfe90';
 const N8N_BASE = 'http://178.104.95.111:5678/webhook';
+const PANEL_VERSION = '3.1.6';
 // ===== STATE =====
 let currentUser = null;
 let allTrocas = [];
@@ -1096,6 +1097,94 @@ function buildTimelineHtml(t){
   return entries.map(entry => buildTimelineItem(entry.label, entry.meta, entry.state)).join('');
 }
 
+function buildDetalheGridHtml(t){
+  const valorPrincipal = t.valorVoucherNumero || t.valorTrocaNumero || t.valorEstornoNumero || 0;
+  return `
+    <div class="detail-item"><label>Status Atual</label><div class="value">${escapeHtml(t.status || '—')}</div></div>
+    <div class="detail-item"><label>Pedido</label><div class="value">#${escapeHtml(t.pedido || '—')}</div></div>
+    <div class="detail-item"><label>Cliente</label><div class="value">${escapeHtml(t.cliente || '—')}</div></div>
+    <div class="detail-item"><label>Protocolo</label><div class="value" style="font-family:'DM Mono',monospace">${escapeHtml(t.protocolo || '—')}</div></div>
+    <div class="detail-item"><label>Desejo</label><div class="value">${escapeHtml(t.desejo || '—')}</div></div>
+    <div class="detail-item"><label>Motivo</label><div class="value">${escapeHtml(t.motivo || '—')}</div></div>
+    <div class="detail-item full"><label>Peças Declaradas</label><div class="value" style="white-space:pre-wrap">${escapeHtml(t.pecasDeclaradas || '—')}</div></div>
+    <div class="detail-item full"><label>Códigos Declarados</label><div class="value" style="white-space:pre-wrap;font-family:'DM Mono',monospace">${escapeHtml(t.codigosDeclarados || '—')}</div></div>
+    <div class="detail-item"><label>Código de Logística</label><div class="value" style="font-family:'DM Mono',monospace">${escapeHtml(t.codigoLogistica || '—')}</div></div>
+    <div class="detail-item"><label>Valor Referência</label><div class="value">${valorPrincipal ? formatCurrency(valorPrincipal) : '—'}</div></div>
+    <div class="detail-item"><label>E-mail</label><div class="value">${escapeHtml(t.email || '—')}</div></div>
+    <div class="detail-item"><label>Telefone</label><div class="value">${escapeHtml(t.telefone || '—')}</div></div>
+  `;
+}
+async function abrirDetalhe(recordId){
+  const rec = allTrocas.find(r=>r.id===recordId);
+  if(!rec){
+    showToast('Registro não encontrado.','warning');
+    return;
+  }
+  currentRecord = rec;
+  const t = normalizeTroca(rec);
+  const protoEl = document.getElementById('modal-detalhe-proto');
+  const gridEl = document.getElementById('modal-detalhe-grid');
+  const timelineEl = document.getElementById('modal-detalhe-timeline');
+  const btnVoucher = document.getElementById('btn-validar-voucher-detalhe');
+  const btnLogistica = document.getElementById('btn-gerar-logistica-detalhe');
+  if(protoEl) protoEl.textContent = `${t.protocolo} · Pedido #${t.pedido} · ${t.cliente}`;
+  if(gridEl) gridEl.innerHTML = buildDetalheGridHtml(t);
+  if(timelineEl) timelineEl.innerHTML = buildTimelineHtml(t);
+  if(btnVoucher) btnVoucher.style.display = statusMatches(t.status,'Aguardando validação voucher') ? 'inline-flex' : 'none';
+  if(btnLogistica) btnLogistica.style.display = statusMatches(t.status,'Aguardando código de logística') ? 'inline-flex' : 'none';
+  openModal('modal-detalhe');
+}
+function preencherLogisticaManual(recordId){
+  const rec = allTrocas.find(r=>r.id===recordId);
+  if(!rec){
+    showToast('Registro não encontrado para preencher a logística.','warning');
+    return;
+  }
+  currentRecord = rec;
+  const t = normalizeTroca(rec);
+  const setValue = (id, value) => { const el = document.getElementById(id); if(el) el.value = value || ''; };
+  setValue('logmanual-protocolo', t.protocolo || '');
+  setValue('logmanual-pedido', t.pedido || '');
+  setValue('logmanual-recordid', rec.id || '');
+  setValue('logmanual-cliente', t.cliente || '');
+  setValue('logmanual-telefone', t.telefone || '');
+  openModal('modal-logistica-manual');
+}
+function abrirLogisticaManualComDados(){
+  if(!currentRecord){
+    showToast('Selecione um registro antes de abrir a logística manual.','warning');
+    return;
+  }
+  closeModal('modal-detalhe');
+  preencherLogisticaManual(currentRecord.id);
+}
+async function gerarLogisticaManual(){
+  const payload = {
+    protocolo: (document.getElementById('logmanual-protocolo')?.value || '').trim(),
+    numero_pedido: (document.getElementById('logmanual-pedido')?.value || '').trim(),
+    airtable_record_id: (document.getElementById('logmanual-recordid')?.value || '').trim(),
+    cliente: (document.getElementById('logmanual-cliente')?.value || '').trim(),
+    telefone: (document.getElementById('logmanual-telefone')?.value || '').trim(),
+    modo: 'manual'
+  };
+  if(!payload.numero_pedido || !payload.airtable_record_id || !payload.cliente || !payload.telefone){
+    showToast('Preencha todos os campos obrigatórios da logística manual.','warning');
+    return;
+  }
+  showLoading();
+  try{
+    await postJson(`${N8N_BASE}/gerar-logistica-reversa`, payload);
+    closeModal('modal-logistica-manual');
+    showToast('Logística manual acionada com sucesso.','success');
+    setTimeout(()=>carregarDados(),1500);
+  }catch(e){
+    console.error('Erro ao gerar logística manual:', e);
+    showToast(e.message || 'Erro ao gerar logística manual.','error');
+  }finally{
+    hideLoading();
+  }
+}
+
 // ===== LOGIN =====
 async function fazerLogin(){
   const email=document.getElementById('login-email').value.trim();
@@ -1184,7 +1273,7 @@ function showPage(name, el){
   if(el) el.classList.add('active');
   const t=pageNames[name]||name;
   const parts=t.split(' ');
-  document.getElementById('topbar-title').innerHTML=parts.slice(0,-1).join(' ')+' <span>'+parts[parts.length-1]+'</span>';
+  document.getElementById('topbar-title').innerHTML=parts.slice(0,-1).join(' ')+' <span>'+parts[parts.length-1]+'</span>' + ` <small style="font-size:12px;color:var(--ink-muted);font-weight:600">v${PANEL_VERSION}</small>`;
   currentFilter='';
   document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
   const firstFilter=document.querySelector('#filters-geral .filter-btn');
@@ -1636,12 +1725,11 @@ async function confirmarRecebimento(){
   const pecasRecebidas = itensRecebidos.map(item => item.nome).filter(Boolean);
   const codigosConferidos = itensRecebidos.map(item => item.codigo).filter(Boolean);
   const observacao=document.getElementById('modal-conf-obs').value.trim();
-  const fluxoEstorno = isRefundRequest(t);
   const condicaoBloqueante = /divergente|danificada/i.test(condicao);
   const temDivergencia = divergenciaSolicitacao || condicaoBloqueante;
   const conferenciaOk = !temDivergencia;
   const tipoDevolucao = computeTipoDevolucao(itensDeclarados);
-  const proximoStatus = temDivergencia ? 'Divergência na Conferência' : (fluxoEstorno ? 'Em Retenção pela Gerência' : 'Aguardando voucher');
+  const proximoStatus = temDivergencia ? 'Divergência na Conferência' : 'Peça recebida';
   const nowIso = new Date().toISOString();
 
   const fields = {
@@ -1671,40 +1759,8 @@ async function confirmarRecebimento(){
       return;
     }
 
-    if(fluxoEstorno){
-      closeModal('modal-conferencia');
-      showToast('Recebimento confirmado! Caso enviado para retenção da gerência.','success');
-      setTimeout(()=>carregarDados(),1500);
-      return;
-    }
-
-    const valorVoucher = getVoucherAmount(t);
-    if(valorVoucher > 0){
-      try{
-        await fetch(`${N8N_BASE}/gerar-voucher`,{
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({
-            airtable_record_id:currentRecord.id,
-            numero_pedido:t.pedido,
-            cliente:t.cliente,
-            valor_voucher:valorVoucher
-          })
-        });
-        closeModal('modal-conferencia');
-        showToast('Recebimento confirmado e geração de voucher acionada!','success');
-        setTimeout(()=>carregarDados(),2500);
-      }catch(err){
-        console.error('Erro ao acionar gerar-voucher:', err);
-        closeModal('modal-conferencia');
-        showToast('Recebimento confirmado, mas a geração automática do voucher falhou. Caso ficou em Aguardando voucher.','warning');
-        setTimeout(()=>carregarDados(),2000);
-      }
-      return;
-    }
-
     closeModal('modal-conferencia');
-    showToast('Recebimento confirmado! Caso movido para Aguardando voucher.','success');
+    showToast('Recebimento confirmado! Conferência salva. Próxima etapa: NF de entrada.','success');
     setTimeout(()=>carregarDados(),1500);
   }catch(e){
     console.error('Erro ao confirmar recebimento:', e);
