@@ -268,6 +268,9 @@ select.form-control{cursor:pointer}
           <button class="filter-btn" onclick="setFilter(this,'Aguardando validação voucher')">Validação Voucher</button>
           <button class="filter-btn" onclick="setFilter(this,'Em Retenção pela Gerência')">Em Retenção</button>
           <button class="filter-btn" onclick="setFilter(this,'Aguardando Estorno')">Aguardando Estorno</button>
+          <button class="filter-btn" onclick="setFilter(this,'Processando NF de Entrada')">Processando NF</button>
+          <button class="filter-btn" onclick="setFilter(this,'Erro NF Entrada')">Erro NF</button>
+          <button class="filter-btn" onclick="setFilter(this,'Estoque Lançado')">Estoque Lançado</button>
           <button class="filter-btn" onclick="setFilter(this,'Solicitação Finalizada')">Finalizado</button>
         </div>
         <div class="table-card">
@@ -386,6 +389,7 @@ select.form-control{cursor:pointer}
         </div>
         <span style="font-size:24px">📬</span>
       </div>
+      <div id="modal-voucher-summary" style="display:none"></div>
       <div class="detail-grid" id="modal-detalhe-grid"></div>
       <div class="section-divider">Histórico</div>
       <ul class="timeline" id="modal-detalhe-timeline"></ul>
@@ -822,6 +826,11 @@ function canonicalStatus(status=''){
   if(s==='aguardando estorno') return 'Aguardando Estorno';
   if(s==='estorno autorizado') return 'Estorno Autorizado';
   if(s==='estorno realizado') return 'Estorno Realizado';
+  if(s==='divergencia na conferencia') return 'Divergência na Conferência';
+  if(s==='nf de entrada gerada') return 'NF de Entrada Gerada';
+  if(s==='processando nf de entrada') return 'Processando NF de Entrada';
+  if(s==='erro nf entrada') return 'Erro NF Entrada';
+  if(s==='estoque lancado') return 'Estoque Lançado';
   if(s==='finalizado' || s==='solicitacao finalizada') return 'Solicitação Finalizada';
   return status || 'Novo';
 }
@@ -839,6 +848,11 @@ function badgeStatus(status){
     'Aguardando validação voucher':'badge-voucher',
     'Voucher gerado':'badge-voucher',
     'Em Retenção pela Gerência':'badge-retention',
+    'Divergência na Conferência':'badge-retention',
+    'Processando NF de Entrada':'badge-logistica',
+    'NF de Entrada Gerada':'badge-logistica',
+    'Erro NF Entrada':'badge-refund',
+    'Estoque Lançado':'badge-done',
     'Aguardando Estorno':'badge-refund',
     'Estorno Autorizado':'badge-refund',
     'Estorno Realizado':'badge-done',
@@ -901,6 +915,11 @@ function getCurrentTimelineStatusLabel(status=''){
   if(s==='Aguardando validação voucher') return 'Aguardando validação voucher';
   if(s==='Voucher gerado') return 'Voucher gerado';
   if(s==='Em Retenção pela Gerência') return 'Em retenção pela gerência';
+  if(s==='Divergência na Conferência') return 'Divergência na conferência';
+  if(s==='Processando NF de Entrada') return 'Processando NF de entrada';
+  if(s==='NF de Entrada Gerada') return 'NF de entrada gerada';
+  if(s==='Erro NF Entrada') return 'Erro NF de entrada';
+  if(s==='Estoque Lançado') return 'Estoque lançado';
   if(s==='Aguardando Estorno') return 'Aguardando estorno';
   if(s==='Estorno Autorizado') return 'Estorno autorizado';
   if(s==='Estorno Realizado') return 'Estorno realizado';
@@ -999,8 +1018,21 @@ function normalizeTroca(rec){
     linhaEstornoConfirmado: firstFilled(f['Linha Formatada – Estorno Confirmado'], ''),
     linhaComprovanteEnviado: firstFilled(f['Linha Formatada – Comprovante do Estorno Enviado'], ''),
     linhaReemissaoLogistica: firstFilled(f['Linha Formatada – Reemissão de Logística'], ''),
+    linhaDivergenciaConferencia: firstFilled(f['Linha Formatada – Divergência na Conferência'], ''),
+    linhaNFEntradaGerada: firstFilled(f['Linha Formatada – NF de Entrada Gerada'], ''),
+    linhaEstoqueLancado: firstFilled(f['Linha Formatada – Estoque Lançado'], ''),
     linhaFinalizacao: firstFilled(f['Linha Formatada – Solicitação Finalizada'], ''),
     voucherCodigo: firstFilled(f['Voucher'], f['Código Voucher'], f['codigo_voucher'], ''),
+    numeroNFEntrada: firstFilled(f['Número NF Entrada'], f['NF Entrada'], ''),
+    idNFEntradaBling: firstFilled(f['ID NF Entrada Bling'], ''),
+    dataNFEntrada: firstFilled(f['Data NF Entrada'], ''),
+    estoqueLançadoFlag: firstFilled(f['Estoque Lançado'], ''),
+    dataLancamentoEstoque: firstFilled(f['Data Lançamento Estoque'], ''),
+    erroNFEntrada: firstFilled(f['Erro NF Entrada'], ''),
+    proximoStatusPosNF: firstFilled(f['Próximo Status Pós NF'], ''),
+    filaPosNF: firstFilled(f['Fila Pós NF'], ''),
+    divergenciaConferenciaFlag: firstFilled(f['Divergência na Conferência'], ''),
+    nfEntradaLiberada: firstFilled(f['NF Entrada Liberada'], ''),
     tentativaLogistica: Number(firstFilled(f['Tentativa de Logística'], 0) || 0),
     reemissaoLogistica: firstFilled(f['Reemissão de Logística'], ''),
     reemissaoAutorizada: firstFilled(f['Reemissão Autorizada'], ''),
@@ -1028,6 +1060,46 @@ function getVoucherAmount(t){
     ? t.valorVoucherNumero
     : (t?.valorTrocaNumero > 0 ? t.valorTrocaNumero : 0);
 }
+function isFiscalStatus(status=''){
+  return statusMatches(status,'Processando NF de Entrada','NF de Entrada Gerada','Erro NF Entrada','Estoque Lançado');
+}
+function getPostFiscalTarget(t){
+  const fila = statusToken(t?.filaPosNF || '');
+  const nextStatus = canonicalStatus(t?.proximoStatusPosNF || '');
+  const pending = statusMatches(t?.status,'Estoque Lançado') && !!fila;
+  return { fila, nextStatus, pending };
+}
+function isVoucherCandidate(t){
+  const desejo = statusToken(t?.desejo || '');
+  return desejo.includes('voucher') || desejo.includes('troca por outro');
+}
+function shouldShowVoucherCard(t){
+  return !!(t?.voucherCodigo || t?.valorVoucherNumero > 0 || t?.valorTrocaNumero > 0 || t?.dataVoucher || t?.resultadoRetencao === 'Converteu para voucher');
+}
+function buildVoucherResumoHtml(t){
+  const valor = getVoucherAmount(t) || t?.valorVoucherNumero || t?.valorTrocaNumero || 0;
+  const descricao = t?.voucherCodigo
+    ? 'Voucher já gerado para esta solicitação.'
+    : 'Valor operacional calculado para voucher/troca.';
+  return `
+    <div class="voucher-card">
+      <div class="vc-label">Resumo do Voucher</div>
+      <div class="vc-value">${valor ? formatCurrency(valor) : '—'}</div>
+      <div style="font-size:12px;opacity:.7">${escapeHtml(descricao)}</div>
+      ${t?.voucherCodigo ? `<div class="vc-code">${escapeHtml(t.voucherCodigo)}</div>` : ''}
+    </div>
+  `;
+}
+function buildFiscalResumoHtml(t){
+  const campos = [];
+  if(t?.numeroNFEntrada) campos.push(`<div class="detail-item"><label>NF Entrada</label><div class="value">${escapeHtml(t.numeroNFEntrada)}</div></div>`);
+  if(t?.dataNFEntrada) campos.push(`<div class="detail-item"><label>Data NF Entrada</label><div class="value">${escapeHtml(formatDate(t.dataNFEntrada))}</div></div>`);
+  if(t?.dataLancamentoEstoque) campos.push(`<div class="detail-item"><label>Data Lanç. Estoque</label><div class="value">${escapeHtml(formatDate(t.dataLancamentoEstoque))}</div></div>`);
+  if(t?.proximoStatusPosNF) campos.push(`<div class="detail-item"><label>Próximo Status Pós NF</label><div class="value">${escapeHtml(t.proximoStatusPosNF)}</div></div>`);
+  if(t?.filaPosNF) campos.push(`<div class="detail-item"><label>Fila Pós NF</label><div class="value">${escapeHtml(t.filaPosNF)}</div></div>`);
+  if(t?.erroNFEntrada) campos.push(`<div class="detail-item full"><label>Erro NF Entrada</label><div class="value" style="color:var(--red)">${escapeHtml(t.erroNFEntrada)}</div></div>`);
+  return campos.join('');
+}
 function buildTimelineHtml(t){
   const entries = [];
   const existingKeys = new Set();
@@ -1050,6 +1122,9 @@ function buildTimelineHtml(t){
   pushLine('aguardando_cliente', t.linhaAguardandoCliente, 'Aguardando retorno do cliente', '');
 
   pushLine('peca_recebida', t.linhaPecaRecebida, 'Peça Recebida', t.dataRecebimento);
+  pushLine('divergencia_conferencia', t.linhaDivergenciaConferencia, 'Divergência na Conferência', t.dataRecebimento);
+  pushLine('nf_entrada_gerada', t.linhaNFEntradaGerada, 'NF de Entrada Gerada', t.dataNFEntrada);
+  pushLine('estoque_lancado', t.linhaEstoqueLancado, 'Estoque Lançado', t.dataLancamentoEstoque);
   pushLine('voucher_gerado', t.linhaVoucher, 'Voucher Gerado', t.dataVoucher);
   pushLine('aguardando_validacao_voucher', t.linhaAguardandoValidacaoVoucher, 'Aguardando Validação Voucher', t.dataEntradaValidacaoVoucher);
   pushLine('voucher_aprovado', t.linhaVoucherAprovado, 'Voucher Aprovado', t.dataSaidaValidacaoVoucher);
@@ -1070,11 +1145,16 @@ function buildTimelineHtml(t){
     'Aguardando voucher': 'voucher_processando',
     'Aguardando validação voucher': 'aguardando_validacao_voucher',
     'Voucher gerado': 'voucher_gerado',
-    'Em retenção': 'retencao',
-    'Aguardando estorno': 'aguardando_estorno',
-    'Estorno autorizado': 'estorno_autorizado',
+    'Em Retenção pela Gerência': 'retencao',
+    'Divergência na Conferência': 'divergencia_conferencia',
+    'Processando NF de Entrada': 'nf_processando',
+    'NF de Entrada Gerada': 'nf_entrada_gerada',
+    'Erro NF Entrada': 'nf_erro',
+    'Estoque Lançado': 'estoque_lancado',
+    'Aguardando Estorno': 'aguardando_estorno',
+    'Estorno Autorizado': 'estorno_autorizado',
     'Estorno Realizado': 'estorno_confirmado',
-    'Finalizado': 'finalizado'
+    'Solicitação Finalizada': 'finalizado'
   };
   const currentStatus = canonicalStatus(t.status);
   const currentKey = statusKeyMap[currentStatus] || 'status_atual';
@@ -1112,6 +1192,7 @@ function buildDetalheGridHtml(t){
     <div class="detail-item"><label>Valor Referência</label><div class="value">${valorPrincipal ? formatCurrency(valorPrincipal) : '—'}</div></div>
     <div class="detail-item"><label>E-mail</label><div class="value">${escapeHtml(t.email || '—')}</div></div>
     <div class="detail-item"><label>Telefone</label><div class="value">${escapeHtml(t.telefone || '—')}</div></div>
+    ${buildFiscalResumoHtml(t)}
   `;
 }
 async function abrirDetalhe(recordId){
@@ -1127,10 +1208,18 @@ async function abrirDetalhe(recordId){
   const timelineEl = document.getElementById('modal-detalhe-timeline');
   const btnVoucher = document.getElementById('btn-validar-voucher-detalhe');
   const btnLogistica = document.getElementById('btn-gerar-logistica-detalhe');
+  const logisticsCodeEl = document.getElementById('modal-logistica-code');
+  const voucherSummaryEl = document.getElementById('modal-voucher-summary');
   if(protoEl) protoEl.textContent = `${t.protocolo} · Pedido #${t.pedido} · ${t.cliente}`;
+  if(logisticsCodeEl) logisticsCodeEl.textContent = t.codigoLogistica || t.codigoLogisticaAnterior || '—';
+  if(voucherSummaryEl){
+    const shouldShow = shouldShowVoucherCard(t);
+    voucherSummaryEl.style.display = shouldShow ? 'block' : 'none';
+    voucherSummaryEl.innerHTML = shouldShow ? buildVoucherResumoHtml(t) : '';
+  }
   if(gridEl) gridEl.innerHTML = buildDetalheGridHtml(t);
   if(timelineEl) timelineEl.innerHTML = buildTimelineHtml(t);
-  if(btnVoucher) btnVoucher.style.display = statusMatches(t.status,'Aguardando validação voucher') ? 'inline-flex' : 'none';
+  if(btnVoucher) btnVoucher.style.display = (statusMatches(t.status,'Aguardando validação voucher') || getPostFiscalTarget(t).pending && getPostFiscalTarget(t).fila==='falecom') ? 'inline-flex' : 'none';
   if(btnLogistica) btnLogistica.style.display = statusMatches(t.status,'Aguardando código de logística') ? 'inline-flex' : 'none';
   openModal('modal-detalhe');
 }
@@ -1330,7 +1419,7 @@ function renderGeral(){
     const t = normalizeTroca(r);
     const s=t.status||'';
     if(!statusMatches(s,'Solicitação Finalizada')) total++;
-    if(statusMatches(s,'Aguardando código de logística','Peça recebida','Aguardando voucher','Aguardando validação voucher','Aguardando Estorno','Estorno Autorizado','Estorno Realizado')) acao++;
+    if(statusMatches(s,'Aguardando código de logística','Peça recebida','Aguardando voucher','Aguardando validação voucher','Aguardando Estorno','Estorno Autorizado','Estorno Realizado','Processando NF de Entrada','Erro NF Entrada','Estoque Lançado','Divergência na Conferência')) acao++;
     if(statusMatches(s,'Solicitação Finalizada') && new Date(t.dataAbertura||t.createdTime).toDateString()===hoje) finHoje++;
     if(statusMatches(s,'Aguardando cliente')) transito++;
     if(statusMatches(s,'Em Retenção pela Gerência')) retencao++;
@@ -1358,25 +1447,36 @@ function renderGeral(){
 }
 // ===== RENDER FALECOM =====
 function renderFalecom(){
-  const fila=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Aguardando código de logística','Aguardando validação voucher'));
-  const vouchers=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Aguardando validação voucher')).length;
+  const fila=allTrocas.filter(r=>{
+    const t = normalizeTroca(r);
+    const pf = getPostFiscalTarget(t);
+    return statusMatches(t.status,'Aguardando código de logística','Aguardando validação voucher') || (pf.pending && pf.fila==='falecom');
+  });
+  const vouchers=allTrocas.filter(r=>{
+    const t = normalizeTroca(r);
+    const pf = getPostFiscalTarget(t);
+    return statusMatches(t.status,'Aguardando validação voucher') || (pf.pending && pf.fila==='falecom');
+  }).length;
   const semLog=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Aguardando código de logística')).length;
-  const ret=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Em Retenção pela Gerência')).length;
+  const ret=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Em Retenção pela Gerência','Divergência na Conferência')).length;
   document.getElementById('stat-falecom-voucher').textContent=vouchers;
   document.getElementById('stat-falecom-logistica').textContent=semLog;
   document.getElementById('stat-falecom-retencao').textContent=ret;
   document.getElementById('count-falecom').textContent=fila.length+' casos';
   const alertEl=document.getElementById('alert-falecom-voucher');
-  if(vouchers>0){alertEl.style.display='flex';document.getElementById('txt-alert-falecom').textContent=vouchers+' voucher'+(vouchers>1?'s':'')+' aguardando sua validação.';}
+  if(vouchers>0){alertEl.style.display='flex';document.getElementById('txt-alert-falecom').textContent=vouchers+' caso'+(vouchers>1?'s':'')+' aguardando voucher ou validação.';}
   else alertEl.style.display='none';
   const tbody=document.getElementById('tabela-falecom');
   if(!fila.length){tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--ink-muted)">Nenhum caso pendente 🎉</td></tr>';return}
   tbody.innerHTML=fila.map(r=>{
     const t = normalizeTroca(r);
+    const pf = getPostFiscalTarget(t);
     const status=t.status||'';
     const codLog=t.codigoLogistica||'';
+    const emPosFiscal = pf.pending && pf.fila==='falecom';
+    const statusLabel = emPosFiscal ? `${status} → ${t.proximoStatusPosNF || 'Aguardando validação voucher'}` : status;
     let acoes='';
-    if(statusMatches(status,'Aguardando validação voucher')) acoes=`<button class="btn btn-success btn-sm" onclick="event.stopPropagation();abrirVoucher('${r.id}')">✓ Aprovar e Enviar Voucher</button>`;
+    if(statusMatches(status,'Aguardando validação voucher') || emPosFiscal) acoes=`<button class="btn btn-success btn-sm" onclick="event.stopPropagation();abrirVoucher('${r.id}')">${t.voucherCodigo ? '✓ Aprovar e Enviar Voucher' : '🎟 Gerar Voucher'}</button>`;
     else if(statusMatches(status,'Aguardando código de logística')) acoes=`<button class="btn btn-warning btn-sm" onclick="event.stopPropagation();preencherLogisticaManual('${r.id}')">📬 Gerar</button>`;
     return `<tr onclick="abrirDetalhe('${r.id}')">
       <td class="td-proto">${t.protocolo}</td>
@@ -1384,35 +1484,36 @@ function renderFalecom(){
       <td>#${t.pedido}</td>
       <td style="font-size:12px">${t.pecasDeclaradas}</td>
       <td>${codLog?`<span class="td-logistica">${codLog}</span>`:'<span style="color:var(--ink-muted);font-size:12px">—</span>'}</td>
-      <td>${t.voucherCodigo ? `<strong style="color:var(--rose)">${formatCurrency(t.valorVoucher)}</strong>` : '<span style="color:var(--ink-muted);font-size:12px">—</span>'}</td>
-      <td><span class="badge ${badgeStatus(status)}">${status}</span></td>
+      <td>${getVoucherAmount(t) ? `<strong style="color:var(--rose)">${formatCurrency(getVoucherAmount(t))}</strong>` : '<span style="color:var(--ink-muted);font-size:12px">—</span>'}</td>
+      <td><span class="badge ${badgeStatus(status)}">${statusLabel}</span></td>
       <td><div class="actions-row">${acoes}</div></td>
     </tr>`;
   }).join('');
 }
 // ===== RENDER LOGÍSTICA =====
 function renderLogistica(){
-  const pecas=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Peça recebida','Aguardando cliente','Emissão da Logística Reversa'));
-  const conferir=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Peça recebida')).length;
-  const aguardando=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Aguardando cliente')).length;
+  const pecas=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Aguardando cliente','Emissão da Logística Reversa'));
+  const conferir=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Aguardando cliente')).length;
+  const aguardando=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Emissão da Logística Reversa')).length;
   document.getElementById('stat-log-conferir').textContent=conferir;
   document.getElementById('stat-log-aguardando').textContent=aguardando;
-  document.getElementById('stat-log-hoje').textContent=0;
-  document.getElementById('count-logistica').textContent=conferir+' a conferir';
+  document.getElementById('stat-log-hoje').textContent=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Peça recebida','Divergência na Conferência','Estoque Lançado')).length;
+  document.getElementById('count-logistica').textContent=pecas.length+' casos operacionais';
   const tbody=document.getElementById('tabela-logistica');
   if(!pecas.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--ink-muted)">Nenhuma peça aguardando conferência</td></tr>';return}
   tbody.innerHTML=pecas.map(r=>{
     const t = normalizeTroca(r);
     const status=t.status||'';
     const codLog=t.codigoLogistica||'';
-    return `<tr onclick="abrirConferencia('${r.id}')">
+    const podeRegistrar = statusMatches(status,'Aguardando cliente');
+    return `<tr onclick="${podeRegistrar ? "abrirConferencia('"+r.id+"')" : "abrirDetalhe('"+r.id+"')"}">
       <td class="td-proto">${t.protocolo}</td>
       <td class="td-cliente">${t.cliente}</td>
       <td>#${t.pedido}</td>
       <td style="font-size:12px">${t.pecasDeclaradas}</td>
       <td>${codLog?`<span class="td-logistica">${codLog}</span>`:'<span style="color:var(--ink-muted);font-size:12px">—</span>'}</td>
       <td><span class="badge ${badgeStatus(status)}">${status}</span></td>
-      <td>${statusMatches(status,'Peça recebida')?`<button class="btn btn-primary btn-sm" onclick="event.stopPropagation();abrirConferencia('${r.id}')">📋 Conferir</button>`:'—'}</td>
+      <td>${podeRegistrar ? `<button class="btn btn-primary btn-sm" onclick="event.stopPropagation();abrirConferencia('${r.id}')">📥 Registrar recebimento</button>` : `<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();abrirDetalhe('${r.id}')">Ver →</button>`}</td>
     </tr>`;
   }).join('');
 }
@@ -1461,7 +1562,11 @@ function renderFinanceiro(){
 }
 // ===== RENDER GERÊNCIA =====
 function renderGerencia(){
-  const retencao=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Em Retenção pela Gerência'));
+  const retencao=allTrocas.filter(r=>{
+    const t = normalizeTroca(r);
+    const pf = getPostFiscalTarget(t);
+    return statusMatches(t.status,'Em Retenção pela Gerência','Divergência na Conferência') || (pf.pending && pf.fila==='gerencia');
+  });
   const total=allTrocas.length;
   const fin=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Solicitação Finalizada')).length;
   const estorno=allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Aguardando Estorno','Estorno Autorizado','Estorno Realizado')).length;
@@ -1471,22 +1576,24 @@ function renderGerencia(){
   document.getElementById('stat-ger-estorno').textContent=estorno;
   document.getElementById('count-gerencia').textContent=retencao.length+' caso'+(retencao.length!==1?'s':'');
   const alertEl=document.getElementById('alert-gerencia');
-  if(retencao.length>0){alertEl.style.display='flex';document.getElementById('txt-alert-gerencia').textContent=retencao.length+' caso'+(retencao.length>1?'s':'')+' em retenção aguarda'+(retencao.length>1?'m':'')+ ' sua decisão.';}
+  if(retencao.length>0){alertEl.style.display='flex';document.getElementById('txt-alert-gerencia').textContent=retencao.length+' caso'+(retencao.length>1?'s':'')+' em retenção/gerência aguardando decisão.';}
   else alertEl.style.display='none';
   const tbody=document.getElementById('tabela-gerencia');
   if(!retencao.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--ink-muted)">Nenhum caso em retenção 🎉</td></tr>';return}
   tbody.innerHTML=retencao.map(r=>{
     const t = normalizeTroca(r);
+    const pf = getPostFiscalTarget(t);
+    const emPosFiscal = pf.pending && pf.fila==='gerencia';
+    const observacao = statusMatches(t.status,'Divergência na Conferência') ? (t.fields?.['Motivo Divergência Recebimento'] || t.motivo || 'Divergência na conferência') : (t.motivo || '—');
     return `<tr onclick="abrirRetencao('${r.id}')">
       <td class="td-proto">${t.protocolo}</td>
       <td class="td-cliente">${t.cliente}</td>
       <td>#${t.pedido}</td>
       <td style="font-size:12px">${t.pecasDeclaradas}</td>
-      <td><strong>${formatCurrency(t.valorVoucher)}</strong></td>
-      <td style="max-width:180px;font-size:12px;color:var(--ink-muted)">${t.motivo||'—'}</td>
+      <td><strong>${formatCurrency(getVoucherAmount(t) || t.valorEstornoNumero || 0)}</strong></td>
+      <td style="max-width:180px;font-size:12px;color:var(--ink-muted)">${escapeHtml(emPosFiscal ? (t.proximoStatusPosNF || observacao) : observacao)}</td>
       <td><div class="actions-row">
-        <button class="btn btn-success btn-sm" onclick="event.stopPropagation();currentRecord=allTrocas.find(x=>x.id==='${r.id}');autorizarVoucher()">✓ Voucher</button>
-        <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();currentRecord=allTrocas.find(x=>x.id==='${r.id}');autorizarEstorno()">💳 Estorno</button>
+        <button class="btn btn-success btn-sm" onclick="event.stopPropagation();abrirRetencao('${r.id}')">✓ Decidir</button>
       </div></td>
     </tr>`;
   }).join('');
@@ -1522,11 +1629,11 @@ function renderCarrinhos(){
 // ===== BADGES =====
 function atualizarBadges(){
   const counts={
-    falecom: allTrocas.filter(r=>['Aguardando código de logística','Aguardando validação voucher','Em Retenção pela Gerência'].includes(normalizeTroca(r).status||'')).length,
-    logistica: allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Peça recebida')).length,
+    falecom: allTrocas.filter(r=>{ const t=normalizeTroca(r); const pf=getPostFiscalTarget(t); return ['Aguardando código de logística','Aguardando validação voucher'].includes(t.status||'') || (pf.pending && pf.fila==='falecom'); }).length,
+    logistica: allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Aguardando cliente','Emissão da Logística Reversa')).length,
     financeiro: allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Aguardando Estorno','Estorno Autorizado','Estorno Realizado')).length,
-    gerencia: allTrocas.filter(r=>statusMatches(normalizeTroca(r).status,'Em Retenção pela Gerência')).length,
-    geral: allTrocas.filter(r=>!statusMatches(normalizeTroca(r).status,'Finalizado')).length,
+    gerencia: allTrocas.filter(r=>{ const t=normalizeTroca(r); const pf=getPostFiscalTarget(t); return statusMatches(t.status,'Em Retenção pela Gerência','Divergência na Conferência') || (pf.pending && pf.fila==='gerencia'); }).length,
+    geral: allTrocas.filter(r=>!statusMatches(normalizeTroca(r).status,'Solicitação Finalizada')).length,
   };
   Object.entries(counts).forEach(([id,n])=>{
     const b=document.getElementById('badge-'+id);
@@ -1743,7 +1850,7 @@ async function confirmarRecebimento(){
     'Itens Extras Recebidos JSON': JSON.stringify(itensExtras, null, 2),
     'Motivo Divergência Recebimento': temDivergencia ? (motivoDivergencia || observacao || condicao) : '',
     'Tipo Devolução Calculada': tipoDevolucao || 'Parcial',
-    'NF Entrada Liberada': conferenciaOk ? 'Sim' : 'Não',
+    'NF Entrada Liberada': 'Sim',
     'Divergência na Conferência': temDivergencia ? 'Sim' : 'Não',
     'Data Atualização Manual': nowIso
   };
@@ -1754,7 +1861,7 @@ async function confirmarRecebimento(){
 
     if(temDivergencia){
       closeModal('modal-conferencia');
-      showToast('Conferência salva com divergência. Caso bloqueado para análise antes da NF de entrada.','warning');
+      showToast('Conferência salva com divergência. NF de entrada liberada; após a frente fiscal o caso seguirá para Gerência.','warning');
       setTimeout(()=>carregarDados(),1500);
       return;
     }
@@ -1863,6 +1970,193 @@ async function confirmarEstorno(){
     hideLoading();
   }
 }
+function getCurrentTroca(){
+  return currentRecord ? normalizeTroca(currentRecord) : null;
+}
+function getRetentionObservation(){
+  return (document.getElementById('modal-ret-obs')?.value || '').trim();
+}
+function getVoucherActionLabel(t){
+  return t?.voucherCodigo ? '✓ Aprovar e Enviar Voucher' : '🎟 Gerar Voucher';
+}
+async function abrirVoucher(recordId){
+  const rec=allTrocas.find(r=>r.id===recordId);
+  if(!rec) return;
+  currentRecord=rec;
+  const t = normalizeTroca(rec);
+  document.getElementById('modal-voucher-proto').textContent=`${t.protocolo} · Pedido #${t.pedido} · ${t.cliente}`;
+  document.getElementById('modal-voucher-valor').textContent = formatCurrency(getVoucherAmount(t) || 0);
+  document.getElementById('modal-voucher-desc').textContent = t.voucherCodigo
+    ? `Voucher já gerado: ${t.voucherCodigo}`
+    : 'O voucher será gerado com base no valor operacional desta solicitação.';
+  const grid = document.getElementById('modal-voucher-grid');
+  if(grid){
+    grid.innerHTML = `
+      <div class="detail-item"><label>Status Atual</label><div class="value">${escapeHtml(t.status || '—')}</div></div>
+      <div class="detail-item"><label>Pedido</label><div class="value">#${escapeHtml(t.pedido || '—')}</div></div>
+      <div class="detail-item"><label>Cliente</label><div class="value">${escapeHtml(t.cliente || '—')}</div></div>
+      <div class="detail-item"><label>Desejo</label><div class="value">${escapeHtml(t.desejo || '—')}</div></div>
+      <div class="detail-item full"><label>Peças Declaradas</label><div class="value" style="white-space:pre-wrap">${escapeHtml(t.pecasDeclaradas || '—')}</div></div>
+      ${t.voucherCodigo ? `<div class="detail-item"><label>Código do Voucher</label><div class="value" style="font-family:'DM Mono',monospace">${escapeHtml(t.voucherCodigo)}</div></div>` : ''}
+      <div class="detail-item"><label>Valor Operacional</label><div class="value">${formatCurrency(getVoucherAmount(t) || 0)}</div></div>
+    `;
+  }
+  const primaryBtn = document.querySelector('#modal-voucher .btn-success');
+  if(primaryBtn) primaryBtn.textContent = getVoucherActionLabel(t);
+  openModal('modal-voucher');
+}
+async function validarEEnviarVoucher(){
+  const t = getCurrentTroca();
+  if(!t || !currentRecord){ showToast('Selecione um registro válido.','warning'); return; }
+  const valor = getVoucherAmount(t);
+  if(!valor || valor <= 0){ showToast('Valor do voucher inválido para esta solicitação.','warning'); return; }
+  showLoading();
+  try{
+    if(!t.voucherCodigo){
+      await postJson(`${N8N_BASE}/gerar-voucher`, {
+        airtable_record_id: currentRecord.id,
+        numero_pedido: String(t.pedido || ''),
+        cliente: t.cliente || '',
+        valor_voucher: valor
+      });
+      closeModal('modal-voucher');
+      showToast('Voucher gerado com sucesso. Reabra para validar/enviar ao cliente, se necessário.','success');
+      setTimeout(()=>carregarDados(),1500);
+      return;
+    }
+    await postJson(`${N8N_BASE}/enviar-voucher`, {
+      airtable_record_id: currentRecord.id,
+      numero_pedido: String(t.pedido || ''),
+      cliente: t.cliente || '',
+      email: t.email || '',
+      telefone: t.telefone || '',
+      codigo_voucher: t.voucherCodigo,
+      valor_voucher: valor
+    });
+    closeModal('modal-voucher');
+    showToast('Voucher enviado com sucesso ao cliente.','success');
+    setTimeout(()=>carregarDados(),1500);
+  }catch(e){
+    console.error('Erro ao validar/enviar voucher:', e);
+    showToast(e.message || 'Erro ao processar voucher.','error');
+  }finally{
+    hideLoading();
+  }
+}
+async function enviarParaRetencao(){
+  const t = getCurrentTroca();
+  if(!t || !currentRecord) return;
+  showLoading();
+  try{
+    await updateAirtable(BASE_TROCAS, TABLE_TROCAS, currentRecord.id, {
+      'Status Atual':'Em Retenção pela Gerência',
+      'Resultado da Retenção': t.resultadoRetencao || 'Sem tentativa de retenção',
+      'Data Retenção Gerência': t.dataRetencao || new Date().toISOString(),
+      'Data Atualização Manual': new Date().toISOString()
+    });
+    showToast('Caso enviado para a Gerência.','success');
+    setTimeout(()=>carregarDados(),1500);
+  }catch(e){
+    console.error('Erro ao enviar para retenção:', e);
+    showToast('Erro ao enviar caso para a Gerência.','error');
+  }finally{
+    hideLoading();
+  }
+}
+async function abrirRetencao(recordId){
+  const rec=allTrocas.find(r=>r.id===recordId);
+  if(!rec) return;
+  currentRecord=rec;
+  const t = normalizeTroca(rec);
+  const pf = getPostFiscalTarget(t);
+  document.getElementById('modal-ret-proto').textContent=`${t.protocolo} · Pedido #${t.pedido} · ${t.cliente}`;
+  const motivoEl = document.getElementById('modal-ret-motivo');
+  if(motivoEl){
+    if(statusMatches(t.status,'Divergência na Conferência')){
+      motivoEl.textContent = `Divergência registrada na conferência. ${t.fields?.['Motivo Divergência Recebimento'] || 'Analise o caso e decida entre voucher ou estorno.'}`;
+    }else if(isRefundRequest(t)){
+      motivoEl.textContent = 'Solicitação de devolução com estorno. Tente converter antes de seguir para a frente financeira.';
+    }else if(pf.pending && pf.fila==='gerencia'){
+      motivoEl.textContent = `Pós-fiscal calculado para Gerência. Próximo status sugerido: ${t.proximoStatusPosNF || 'Em Retenção pela Gerência'}.`;
+    }else{
+      motivoEl.textContent = 'Caso em retenção aguardando decisão da Gerência.';
+    }
+  }
+  const grid = document.getElementById('modal-ret-grid');
+  if(grid){
+    grid.innerHTML = `
+      <div class="detail-item"><label>Status Atual</label><div class="value">${escapeHtml(t.status || '—')}</div></div>
+      <div class="detail-item"><label>Desejo</label><div class="value">${escapeHtml(t.desejo || '—')}</div></div>
+      <div class="detail-item"><label>Cliente</label><div class="value">${escapeHtml(t.cliente || '—')}</div></div>
+      <div class="detail-item"><label>Pedido</label><div class="value">#${escapeHtml(t.pedido || '—')}</div></div>
+      <div class="detail-item"><label>Valor de Referência</label><div class="value">${formatCurrency(getVoucherAmount(t) || t.valorEstornoNumero || 0)}</div></div>
+      <div class="detail-item"><label>Resultado Atual</label><div class="value">${escapeHtml(t.resultadoRetencao || 'Pendente')}</div></div>
+      <div class="detail-item full"><label>Peças Declaradas</label><div class="value" style="white-space:pre-wrap">${escapeHtml(t.pecasDeclaradas || '—')}</div></div>
+    `;
+  }
+  document.getElementById('modal-ret-obs').value = t.observacaoEstorno || '';
+  openModal('modal-retencao');
+}
+async function autorizarVoucher(){
+  const t = getCurrentTroca();
+  if(!t || !currentRecord){ showToast('Selecione um caso válido.','warning'); return; }
+  const valor = getVoucherAmount(t);
+  if(!valor || valor <= 0){ showToast('Valor inválido para geração do voucher.','warning'); return; }
+  const observacao = getRetentionObservation();
+  showLoading();
+  try{
+    await updateAirtable(BASE_TROCAS, TABLE_TROCAS, currentRecord.id, {
+      'Resultado da Retenção':'Converteu para voucher',
+      'Data Retenção Gerência': t.dataRetencao || new Date().toISOString(),
+      'Observação do Estorno': observacao || t.observacaoEstorno || '',
+      'Data Atualização Manual': new Date().toISOString()
+    });
+    await postJson(`${N8N_BASE}/gerar-voucher`, {
+      airtable_record_id: currentRecord.id,
+      numero_pedido: String(t.pedido || ''),
+      cliente: t.cliente || '',
+      valor_voucher: valor
+    });
+    closeModal('modal-retencao');
+    showToast('Voucher gerado e caso enviado para validação do Falecom.','success');
+    setTimeout(()=>carregarDados(),1500);
+  }catch(e){
+    console.error('Erro ao autorizar voucher:', e);
+    showToast(e.message || 'Erro ao converter caso para voucher.','error');
+  }finally{
+    hideLoading();
+  }
+}
+async function autorizarEstorno(){
+  const t = getCurrentTroca();
+  if(!t || !currentRecord){ showToast('Selecione um caso válido.','warning'); return; }
+  const observacao = getRetentionObservation();
+  const valorEstorno = t.valorEstornoNumero > 0 ? t.valorEstornoNumero : (getVoucherAmount(t) || 0);
+  if(!valorEstorno || valorEstorno <= 0){ showToast('Valor do estorno inválido para este caso.','warning'); return; }
+  showLoading();
+  try{
+    await updateAirtable(BASE_TROCAS, TABLE_TROCAS, currentRecord.id, {
+      'Resultado da Retenção':'Seguiu para estorno',
+      'Status Atual':'Aguardando Estorno',
+      'Estorno':'Sim',
+      'Valor do Estorno': valorEstorno,
+      'Responsável Autorização Estorno': currentUser?.nome || 'Gerência',
+      'Observação do Estorno': observacao || t.observacaoEstorno || '',
+      'Data Aguardando Estorno': new Date().toISOString(),
+      'Data Retenção Gerência': t.dataRetencao || new Date().toISOString(),
+      'Data Atualização Manual': new Date().toISOString()
+    });
+    closeModal('modal-retencao');
+    showToast('Caso enviado para a fila de estorno do Financeiro.','success');
+    setTimeout(()=>carregarDados(),1500);
+  }catch(e){
+    console.error('Erro ao autorizar estorno:', e);
+    showToast(e.message || 'Erro ao enviar caso para estorno.','error');
+  }finally{
+    hideLoading();
+  }
+}
+
 async function lancarTrocaManual(){
   const pedido=document.getElementById('nova-pedido').value.trim();
   const cliente=document.getElementById('nova-cliente').value.trim();
