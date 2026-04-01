@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tamtaum — Painel de Trocas v3.1.8</title>
+<title>Tamtaum — Painel de Trocas v3.1.9</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -220,14 +220,14 @@ select.form-control{cursor:pointer}
     <button class="btn-login" id="btn-entrar" onclick="fazerLogin()">Entrar</button>
     <div class="login-error" id="login-error">E-mail ou senha incorretos. Verifique e tente novamente.</div>
   </div>
-  <div class="login-footer">Desenvolvido por <strong>Marcus Dutra</strong> · Versão 3.1.8</div>
+  <div class="login-footer">Desenvolvido por <strong>Marcus Dutra</strong> · Versão 3.1.9</div>
 </div>
 <!-- ===== APP ===== -->
 <div id="app">
   <aside class="sidebar">
     <div class="sidebar-logo">
       <div class="brand">TAMTAUM</div>
-      <div class="sub">Painel de Trocas • v3.1.8</div>
+      <div class="sub">Painel de Trocas • v3.1.9</div>
     </div>
     <nav class="sidebar-nav" id="sidebar-nav"></nav>
     <div class="sidebar-user">
@@ -785,6 +785,22 @@ function formatDate(str){
     return d.toLocaleDateString('pt-BR');
   }catch{return str}
 }
+function formatDateTime(str){
+  if(!str) return '—';
+  try{
+    const d = new Date(str);
+    if(Number.isNaN(d.getTime())) return String(str);
+    return d.toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }catch{
+    return str;
+  }
+}
 function parseCurrencyValue(v){
   if(v===undefined || v===null || v==='') return 0;
   if(typeof v==='number') return Number.isFinite(v) ? v : 0;
@@ -1103,38 +1119,53 @@ function buildFiscalResumoHtml(t){
 function buildTimelineHtml(t){
   const entries = [];
   const existingKeys = new Set();
-  const pushLine = (key, lineValue, fallbackLabel, fallbackDate='') => {
+
+  const pushLine = (key, lineValue, fallbackLabel, fallbackDate = '', allowFallback = true) => {
     const parsed = parseFormattedTimelineLine(lineValue, fallbackLabel);
     if(parsed){
       entries.push({ key, label: parsed.label, meta: parsed.date || parsed.raw, state: 'done' });
       existingKeys.add(key);
       return;
     }
-    if(fallbackDate){
-      entries.push({ key, label: fallbackLabel, meta: formatDate(fallbackDate), state: 'done' });
+    if(allowFallback && fallbackDate){
+      entries.push({ key, label: fallbackLabel, meta: formatDateTime(fallbackDate), state: 'done' });
       existingKeys.add(key);
     }
   };
-  pushLine('solicitacao', t.linhaSolicitacao, 'Cliente solicitou logística', t.dataAbertura);
+
+  pushLine('solicitacao', t.linhaSolicitacao, 'Cliente solicitou logística', t.dataAbertura, true);
 
   // Só mostra eventos de logística quando a linha formatada existir de fato no Airtable
-  pushLine('emissao', t.linhaLogistica, 'Logística Reversa Gerada', '');
-  pushLine('aguardando_cliente', t.linhaAguardandoCliente, 'Aguardando retorno do cliente', '');
+  pushLine('emissao', t.linhaLogistica, 'Logística Reversa Gerada', '', false);
+  pushLine('aguardando_cliente', t.linhaAguardandoCliente, 'Aguardando retorno do cliente', '', false);
 
-  pushLine('peca_recebida', t.linhaPecaRecebida, 'Peça Recebida', t.dataRecebimento);
-  pushLine('divergencia_conferencia', t.linhaDivergenciaConferencia, 'Divergência na Conferência', t.dataRecebimento);
-  pushLine('nf_entrada_gerada', t.linhaNFEntradaGerada, 'NF de Entrada Gerada', t.dataNFEntrada);
-  pushLine('estoque_lancado', t.linhaEstoqueLancado, 'Estoque Lançado', t.dataLancamentoEstoque);
-  pushLine('voucher_gerado', t.linhaVoucher, 'Voucher Gerado', t.dataVoucher);
-  pushLine('aguardando_validacao_voucher', t.linhaAguardandoValidacaoVoucher, 'Aguardando Validação Voucher', t.dataEntradaValidacaoVoucher);
-  pushLine('voucher_aprovado', t.linhaVoucherAprovado, 'Voucher Aprovado', t.dataSaidaValidacaoVoucher);
-  pushLine('voucher_enviado', t.linhaVoucherEnviado, 'Voucher Enviado', t.dataVoucherEnviado);
-  pushLine('retencao', t.linhaRetencao, 'Em Retenção pela Gerência', t.dataRetencao);
-  pushLine('aguardando_estorno', t.linhaAguardandoEstorno, 'Aguardando Estorno', t.dataAguardandoEstorno);
-  pushLine('estorno_autorizado', t.linhaEstornoAutorizado, 'Estorno Autorizado pela Gerência', t.dataEstornoAutorizado);
-  pushLine('estorno_confirmado', t.linhaEstornoConfirmado, 'Estorno Confirmado', t.dataEstorno);
+  pushLine('peca_recebida', t.linhaPecaRecebida, 'Peça Recebida', t.dataRecebimento, true);
+
+  const hasDivergenciaReal =
+    String(t.divergenciaConferenciaFlag || '').trim().toLowerCase() === 'sim' ||
+    !!t.linhaDivergenciaConferencia;
+
+  pushLine(
+    'divergencia_conferencia',
+    t.linhaDivergenciaConferencia,
+    'Divergência na Conferência',
+    hasDivergenciaReal ? t.dataRecebimento : '',
+    hasDivergenciaReal
+  );
+
+  pushLine('nf_entrada_gerada', t.linhaNFEntradaGerada, 'NF de Entrada Gerada', t.dataNFEntrada, true);
+  pushLine('estoque_lancado', t.linhaEstoqueLancado, 'Estoque Lançado', t.dataLancamentoEstoque, true);
+  pushLine('voucher_gerado', t.linhaVoucher, 'Voucher Gerado', t.dataVoucher, true);
+  pushLine('aguardando_validacao_voucher', t.linhaAguardandoValidacaoVoucher, 'Aguardando Validação Voucher', t.dataEntradaValidacaoVoucher, true);
+  pushLine('voucher_aprovado', t.linhaVoucherAprovado, 'Voucher Aprovado', t.dataSaidaValidacaoVoucher, true);
+  pushLine('voucher_enviado', t.linhaVoucherEnviado, 'Voucher Enviado', t.dataVoucherEnviado, true);
+  pushLine('retencao', t.linhaRetencao, 'Em Retenção pela Gerência', t.dataRetencao, true);
+  pushLine('aguardando_estorno', t.linhaAguardandoEstorno, 'Aguardando Estorno', t.dataAguardandoEstorno, true);
+  pushLine('estorno_autorizado', t.linhaEstornoAutorizado, 'Estorno Autorizado pela Gerência', t.dataEstornoAutorizado, true);
+  pushLine('estorno_confirmado', t.linhaEstornoConfirmado, 'Estorno Confirmado', t.dataEstorno, true);
+
   if(t.linhaFinalizacao){
-    pushLine('finalizado', t.linhaFinalizacao, 'Solicitação finalizada ✅', t.dataFinalizacao);
+    pushLine('finalizado', t.linhaFinalizacao, 'Solicitação finalizada ✅', t.dataFinalizacao, true);
   }
 
   const statusKeyMap = {
@@ -1156,24 +1187,30 @@ function buildTimelineHtml(t){
     'Estorno Realizado': 'estorno_confirmado',
     'Solicitação Finalizada': 'finalizado'
   };
+
   const currentStatus = canonicalStatus(t.status);
   const currentKey = statusKeyMap[currentStatus] || 'status_atual';
+
   if(!existingKeys.has(currentKey)){
     entries.push({
       key: currentKey,
       label: getCurrentTimelineStatusLabel(currentStatus),
-      meta: currentStatus==='Solicitação Finalizada' && t.dataFinalizacao ? formatDate(t.dataFinalizacao) : 'Status atual',
+      meta: currentStatus === 'Solicitação Finalizada' && t.dataFinalizacao
+        ? formatDateTime(t.dataFinalizacao)
+        : 'Status atual',
       state: 'current'
     });
   }
+
   if(!entries.length){
     entries.push({
-      key:'status_atual',
+      key: 'status_atual',
       label: getCurrentTimelineStatusLabel(currentStatus),
-      meta: t.dataAbertura ? formatDate(t.dataAbertura) : 'Sem data registrada',
-      state:'current'
+      meta: t.dataAbertura ? formatDateTime(t.dataAbertura) : 'Sem data registrada',
+      state: 'current'
     });
   }
+
   return entries.map(entry => buildTimelineItem(entry.label, entry.meta, entry.state)).join('');
 }
 
