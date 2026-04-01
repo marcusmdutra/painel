@@ -2189,7 +2189,6 @@ async function autorizarEstorno(){
       'Status Atual':'Aguardando Estorno',
       'Estorno':'Sim',
       'Valor do Estorno': valorEstorno,
-      'Responsável Autorização Estorno': currentUser?.nome || 'Gerência',
       'Observação do Estorno': observacao || t.observacaoEstorno || '',
       'Data Aguardando Estorno': new Date().toISOString(),
       'Data Retenção Gerência': t.dataRetencao || new Date().toISOString(),
