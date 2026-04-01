@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tamtaum — Painel de Trocas v3.1.7</title>
+<title>Tamtaum — Painel de Trocas v3.1.8</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -220,14 +220,14 @@ select.form-control{cursor:pointer}
     <button class="btn-login" id="btn-entrar" onclick="fazerLogin()">Entrar</button>
     <div class="login-error" id="login-error">E-mail ou senha incorretos. Verifique e tente novamente.</div>
   </div>
-  <div class="login-footer">Desenvolvido por <strong>Marcus Dutra</strong> · Versão 3.1.7</div>
+  <div class="login-footer">Desenvolvido por <strong>Marcus Dutra</strong> · Versão 3.1.8</div>
 </div>
 <!-- ===== APP ===== -->
 <div id="app">
   <aside class="sidebar">
     <div class="sidebar-logo">
       <div class="brand">TAMTAUM</div>
-      <div class="sub">Painel de Trocas • v3.1.7</div>
+      <div class="sub">Painel de Trocas • v3.1.8</div>
     </div>
     <nav class="sidebar-nav" id="sidebar-nav"></nav>
     <div class="sidebar-user">
@@ -1813,17 +1813,26 @@ async function abrirConferencia(recordId){
 }
 async function confirmarRecebimento(){
   if(!currentRecord) return;
+
   const t = normalizeTroca(currentRecord);
-  const condicao=document.getElementById('modal-conf-condicao').value;
-  if(!condicao){showToast('Selecione a condição das peças','warning');return}
+  const condicao = document.getElementById('modal-conf-condicao').value;
+  if(!condicao){
+    showToast('Selecione a condição das peças','warning');
+    return;
+  }
 
   const itensDeclarados = collectConferenciaItems('#modal-conf-items .check-item');
   const itensRecebidos = itensDeclarados.filter(item => item.recebido && item.quantidade_recebida > 0);
-  if(!itensRecebidos.length){showToast('Marque ao menos 1 item recebido da solicitação','warning');return}
+  if(!itensRecebidos.length){
+    showToast('Marque ao menos 1 item recebido da solicitação','warning');
+    return;
+  }
 
   const divergenciaSolicitacao = (document.getElementById('modal-conf-divergencia')?.value || 'Não') === 'Sim';
-  const itensExtras = collectConferenciaItems('#modal-conf-extra-items .check-item').filter(item => item.recebido && item.quantidade_recebida > 0);
+  const itensExtras = collectConferenciaItems('#modal-conf-extra-items .check-item')
+    .filter(item => item.recebido && item.quantidade_recebida > 0);
   const motivoDivergencia = document.getElementById('modal-conf-divergencia-motivo').value.trim();
+
   if(divergenciaSolicitacao && !itensExtras.length){
     showToast('Marque ao menos 1 peça extra recebida ou mantenha a divergência como Não.','warning');
     return;
@@ -1831,7 +1840,7 @@ async function confirmarRecebimento(){
 
   const pecasRecebidas = itensRecebidos.map(item => item.nome).filter(Boolean);
   const codigosConferidos = itensRecebidos.map(item => item.codigo).filter(Boolean);
-  const observacao=document.getElementById('modal-conf-obs').value.trim();
+  const observacao = document.getElementById('modal-conf-obs').value.trim();
   const condicaoBloqueante = /divergente|danificada/i.test(condicao);
   const temDivergencia = divergenciaSolicitacao || condicaoBloqueante;
   const conferenciaOk = !temDivergencia;
@@ -1859,24 +1868,27 @@ async function confirmarRecebimento(){
   try{
     await updateAirtable(BASE_TROCAS, TABLE_TROCAS, currentRecord.id, fields);
 
-    if(temDivergencia){
-      closeModal('modal-conferencia');
-      showToast('Conferência salva com divergência. NF de entrada liberada; após a frente fiscal o caso seguirá para Gerência.','warning');
-      setTimeout(()=>carregarDados(),1500);
-      return;
-    }
+    const respostaOrquestracao = await postJson(`${N8N_BASE}/orquestrar-pos-fiscal`, {
+      airtable_record_id: currentRecord.id
+    });
 
     closeModal('modal-conferencia');
-    showToast('Recebimento confirmado! Conferência salva. Próxima etapa: NF de entrada.','success');
-    setTimeout(()=>carregarDados(),1500);
+
+    if(temDivergencia){
+      showToast('Conferência salva com divergência. Frente fiscal/orquestração acionada com sucesso.','warning');
+    }else{
+      showToast('Recebimento confirmado! Frente fiscal/orquestração acionada com sucesso.','success');
+    }
+
+    console.log('WF09 acionado após conferência:', respostaOrquestracao);
+    setTimeout(()=>carregarDados(), 1800);
   }catch(e){
     console.error('Erro ao confirmar recebimento:', e);
-    showToast('Erro ao confirmar recebimento','error');
+    showToast(e.message || 'Erro ao confirmar recebimento / acionar orquestração','error');
   }finally{
     hideLoading();
   }
 }
-
 async function abrirEstorno(recordId){
   const rec=allTrocas.find(r=>r.id===recordId);
   if(!rec) return;
