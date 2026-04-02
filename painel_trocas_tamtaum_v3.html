@@ -1385,12 +1385,12 @@ function construirMenu(){
   const setor=currentUser.setor;
   const isAdmin=setor==='Admin';
   const menus=[
-    {id:'geral', icon:'📊', label:'Dashboard', setores:['Admin','Falecom','Logística','Financeiro','Gerência']},
+    {id:'geral', icon:'📊', label:'Dashboard', setores:['Admin','Falecom','Logística','Financeiro','Gerência','Atendimento']},
     {id:'falecom', icon:'💬', label:'Falecom', setores:['Admin','Falecom']},
     {id:'logistica', icon:'📦', label:'Logística', setores:['Admin','Logística']},
     {id:'financeiro', icon:'💳', label:'Financeiro', setores:['Admin','Financeiro']},
     {id:'gerencia', icon:'🏢', label:'Gerência', setores:['Admin','Gerência']},
-    {id:'carrinhos', icon:'🛒', label:'Carrinhos', setores:['Admin','Falecom','Gerência']},
+    {id:'carrinhos', icon:'🛒', label:'Carrinhos', setores:['Admin']},
   ];
   let html='<div class="nav-section">Navegação</div>';
   let primeiroMenu=null;
