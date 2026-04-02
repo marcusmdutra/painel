@@ -1257,6 +1257,8 @@ async function abrirDetalhe(recordId){
   }
   currentRecord = rec;
   const t = normalizeTroca(rec);
+  const isReadOnlyGeral = document.getElementById('page-geral')?.classList.contains('active');
+
   const protoEl = document.getElementById('modal-detalhe-proto');
   const gridEl = document.getElementById('modal-detalhe-grid');
   const timelineEl = document.getElementById('modal-detalhe-timeline');
@@ -1264,17 +1266,27 @@ async function abrirDetalhe(recordId){
   const btnLogistica = document.getElementById('btn-gerar-logistica-detalhe');
   const logisticsCodeEl = document.getElementById('modal-logistica-code');
   const voucherSummaryEl = document.getElementById('modal-voucher-summary');
+
   if(protoEl) protoEl.textContent = `${t.protocolo} · Pedido #${t.pedido} · ${t.cliente}`;
   if(logisticsCodeEl) logisticsCodeEl.textContent = t.codigoLogistica || t.codigoLogisticaAnterior || '—';
+
   if(voucherSummaryEl){
     const shouldShow = shouldShowVoucherCard(t);
     voucherSummaryEl.style.display = shouldShow ? 'block' : 'none';
     voucherSummaryEl.innerHTML = shouldShow ? buildVoucherResumoHtml(t) : '';
   }
+
   if(gridEl) gridEl.innerHTML = buildDetalheGridHtml(t);
   if(timelineEl) timelineEl.innerHTML = buildTimelineHtml(t);
-  if(btnVoucher) btnVoucher.style.display = (statusMatches(t.status,'Aguardando validação voucher') || getPostFiscalTarget(t).pending && getPostFiscalTarget(t).fila==='falecom') ? 'inline-flex' : 'none';
-  if(btnLogistica) btnLogistica.style.display = statusMatches(t.status,'Aguardando código de logística') ? 'inline-flex' : 'none';
+
+  if(isReadOnlyGeral){
+    if(btnVoucher) btnVoucher.style.display = 'none';
+    if(btnLogistica) btnLogistica.style.display = 'none';
+  }else{
+    if(btnVoucher) btnVoucher.style.display = (statusMatches(t.status,'Aguardando validação voucher') || getPostFiscalTarget(t).pending && getPostFiscalTarget(t).fila==='falecom') ? 'inline-flex' : 'none';
+    if(btnLogistica) btnLogistica.style.display = statusMatches(t.status,'Aguardando código de logística') ? 'inline-flex' : 'none';
+  }
+
   openModal('modal-detalhe');
 }
 function preencherLogisticaManual(recordId){
