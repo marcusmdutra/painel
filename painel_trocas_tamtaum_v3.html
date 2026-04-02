@@ -901,6 +901,23 @@ async function updateAirtable(base, table, recordId, fields){
   if(!res.ok) throw new Error(data.error || 'Erro ao atualizar');
   return data;
 }
+async function uploadComprovanteEstorno(recordId, file){
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const res = await fetch(`/api/upload-comprovante-estorno/${recordId}`, {
+    method: 'POST',
+    body: formData
+  });
+
+  const data = await res.json().catch(() => ({}));
+
+  if(!res.ok){
+    throw new Error(data.erro || 'Erro ao subir comprovante');
+  }
+
+  return data;
+}
 function firstFilled(...values){
   for(const v of values){
     if(v!==undefined && v!==null && String(v).trim()!=='') return v;
@@ -1992,19 +2009,42 @@ async function confirmarEstorno(){
       return;
     }
     if(statusMatches(status,'Estorno Autorizado')){
-      if(!comprovante){showToast('Informe o número do comprovante / NSU','warning');return}
-      await updateAirtable(BASE_TROCAS, TABLE_TROCAS, currentRecord.id, {
-        'Status Atual':'Estorno Realizado',
-        'Data Estorno Confirmado': new Date().toISOString(),
-        'ID Transação Pagar.me': comprovante,
-        'Observação do Estorno': observacao || t.observacaoEstorno || '',
-        'Data Envio Comprovante': new Date().toISOString()
-      });
-      closeModal('modal-estorno');
-      showToast('Estorno realizado com sucesso.','success');
-      setTimeout(()=>carregarDados(),1500);
-      return;
-    }
+  if(!comprovante){
+    showToast('Informe o número do comprovante / NSU','warning');
+    return;
+  }
+
+  const arquivo = document.getElementById('file-comprovante')?.files?.[0] || null;
+  if(!arquivo){
+    showToast('Anexe o comprovante em PDF','warning');
+    return;
+  }
+
+  const nomeArquivo = (arquivo.name || '').toLowerCase();
+  const ehPdf = arquivo.type === 'application/pdf' || nomeArquivo.endsWith('.pdf');
+  if(!ehPdf){
+    showToast('O comprovante precisa ser um PDF','warning');
+    return;
+  }
+
+  await uploadComprovanteEstorno(currentRecord.id, arquivo);
+
+  await updateAirtable(BASE_TROCAS, TABLE_TROCAS, currentRecord.id, {
+    'Status Atual':'Estorno Realizado',
+    'Data Estorno Confirmado': new Date().toISOString(),
+    'ID Transação Pagar.me': comprovante,
+    'Observação do Estorno': observacao || t.observacaoEstorno || ''
+  });
+
+  await postJson(`${N8N_BASE}/enviar-comprovante-estorno`, {
+    airtable_record_id: currentRecord.id
+  });
+
+  closeModal('modal-estorno');
+  showToast('Estorno realizado e comprovante enviado com sucesso.','success');
+  setTimeout(()=>carregarDados(),1500);
+  return;
+}
     await updateAirtable(BASE_TROCAS, TABLE_TROCAS, currentRecord.id, {
       'Status Atual':'Solicitação Finalizada',
       'Data Envio Comprovante': t.dataEnvioComprovante || new Date().toISOString(),
